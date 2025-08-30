@@ -8,4 +8,8 @@
     <color name="colorBackground">#4f3848</color>
     <color name="textPrimary">#e5c5b0</color>
     <color name="textSecondary">#d29290</color>
+
+    <!-- Nuevos colores para el diseño -->
+    <color name="transparent_card_background">#3395676E</color>
+    <color name="transparent_edittext_background">#1AFFFFFF</color>
 </resources>

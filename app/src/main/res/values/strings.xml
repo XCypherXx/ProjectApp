@@ -7,7 +7,7 @@
     <string name="version">versión 1.0.0</string>
 
     <!-- Crear variables para el Login -->
-    <string name="titulo_login">Inicie Sesión</string>
+    <string name="titulo_login">Iniciar Sesión</string>
     <string name="lbl_usuario">Usuario</string>
     <string name="lbl_password">Contraseña</string>
     <string name="txt_usuario">Ingresar Usuario</string>
