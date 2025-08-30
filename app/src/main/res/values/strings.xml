@@ -1,3 +1,35 @@
 <resources>
-    <string name="app_name">project</string>
+    <!-- Variables generales -->
+    <string name="app_name">AgendaVoice</string>
+    <string name="developer1">Anthony Condori Guillén</string>
+    <string name="developer2">Sarain Solansh</string>
+    <string name="desarrollo">Desarrollado por</string>
+    <string name="version">versión 1.0.0</string>
+
+    <!-- Crear variables para el Login -->
+    <string name="titulo_login">Inicie Sesión</string>
+    <string name="lbl_usuario">Usuario</string>
+    <string name="lbl_password">Contraseña</string>
+    <string name="txt_usuario">Ingresar Usuario</string>
+    <string name="txt_password">Ingresar Contraseña</string>
+    <string name="btn_ingresar">Ingresar</string>
+    <string name="lbl_crear_cuenta">¿No tienes cuenta? Regístrate</string>
+
+    <!-- Registro -->
+    <string name="titulo_registro">Crear Cuenta</string>
+    <string name="lbl_nombre">Nombre completo</string>
+    <string name="txt_nombre">Ingresar nombre</string>
+    <string name="lbl_usuario_reg">Usuario</string>
+    <string name="txt_usuario_reg">Ingresar usuario</string>
+    <string name="lbl_correo">Correo electrónico</string>
+    <string name="txt_correo">Ingresar correo</string>
+    <string name="lbl_numero">Número de teléfono</string>
+    <string name="txt_numero">Ingresar número</string>
+    <string name="lbl_password_reg">Contraseña</string>
+    <string name="txt_password_reg">Ingresar contraseña</string>
+    <string name="lbl_confirmar_password">Confirmar contraseña</string>
+    <string name="txt_confirmar_password">Reingresar contraseña</string>
+    <string name="btn_registrar">Registrarse</string>
+    <string name="lbl_tengo_cuenta">¿Ya tienes cuenta? Inicia sesión</string>
+
 </resources>
