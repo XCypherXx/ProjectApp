@@ -35,16 +35,14 @@ public class ActivityRegistro extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_registro);
+
 // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        if (mAuth.getCurrentUser() != null) {
-            startActivity(new Intent(this, HomeActivity.class));
-            finish();
-            return;
-        }
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_registro);
+
+
+
+
 
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -58,6 +56,7 @@ public class ActivityRegistro extends AppCompatActivity {
         // btn de Google
         MaterialButton btnGoogle = findViewById(R.id.btnGoogle);
         btnGoogle.setOnClickListener(view -> signIn());
+
 
 
 
@@ -91,7 +90,15 @@ public class ActivityRegistro extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(this, "Inicio de sesión exitoso: " + user.getEmail(), Toast.LENGTH_SHORT).show();
-                        // ir a MainActivity o home
+                        // Si ya hay sesión activa, ir a home desde el btn
+
+                        if (mAuth.getCurrentUser() != null) {
+                            startActivity(new Intent(this, HomeActivity.class));
+                            finish();
+                            return;
+                        }
+
+
                     } else {
                         Toast.makeText(this, "Falló el inicio de sesión", Toast.LENGTH_SHORT).show();
                     }
