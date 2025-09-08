@@ -48,6 +48,10 @@
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
     </style>
 
+    <style name="Theme.MyApp.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Color + logo del splash -->
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
 
 
 
