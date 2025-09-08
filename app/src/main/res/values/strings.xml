@@ -31,5 +31,5 @@
     <string name="txt_confirmar_password">Reingresar contraseña</string>
     <string name="btn_registrar">Registrarse</string>
     <string name="lbl_tengo_cuenta">¿Ya tienes cuenta? Inicia sesión</string>
-
+<string name="default_web_client_id">500031057257-q0mnkludpm2edejp41nq9gq28e6qd3rc.apps.googleusercontent.com</string>
 </resources>
