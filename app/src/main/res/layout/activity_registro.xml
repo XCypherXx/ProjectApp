@@ -46,7 +46,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="AgendaVoice"
+        android:text="@string/app_name"
         android:textColor="@android:color/white"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -63,7 +63,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Regístrate"
+            android:text="@string/titulo_registro"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@android:color/white"
@@ -74,7 +74,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Usuario"
+            android:hint="@string/lbl_usuario_reg"
             android:padding="12dp"
             android:background="@drawable/rounded_edittext"
             android:textColor="@color/md_theme_onPrimary"
@@ -85,7 +85,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Contraseña"
+            android:hint="@string/lbl_password"
             android:padding="12dp"
             android:inputType="textPassword"
             android:background="@drawable/rounded_edittext"
@@ -97,7 +97,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Confirma tu contraseña"
+            android:hint="@string/lbl_confirmar_password"
             android:padding="12dp"
             android:inputType="textPassword"
             android:background="@drawable/rounded_edittext"
@@ -109,7 +109,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Correo Electrónico"
+            android:hint="@string/lbl_correo"
             android:padding="12dp"
             android:inputType="textEmailAddress"
             android:background="@drawable/rounded_edittext"
@@ -121,7 +121,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Número"
+            android:hint="@string/lbl_numero"
             android:padding="12dp"
             android:inputType="phone"
             android:background="@drawable/rounded_edittext"
@@ -142,7 +142,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRegistrarse"
             style="@style/RegistroButton"
-            android:text="Registrarse"
+            android:text="@string/btn_registrar"
             android:layout_width="180dp"
             android:layout_gravity="center_horizontal"
             />
