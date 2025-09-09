@@ -133,7 +133,7 @@
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="He leído y acepto los términos y condiciones de uso."
+            android:text="@string/lbl_terminos_condiciones"
             android:textColor="@color/md_theme_onPrimary"
             android:textSize="12sp" />
 
@@ -168,8 +168,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="O regístrate con"
-            android:textColor="@android:color/white"
+            android:text="@string/lbl_registrate_con"
+            android:textColor="@color/md_theme_outlineVariant"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:textSize="14sp"
@@ -195,22 +195,24 @@
                 android:id="@+id/btnGoogle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Google"
+                android:text="@string/btn_google"
+                android:textStyle="bold"
                 app:icon="@drawable/icon_google"
                 app:iconGravity="start"
+                android:backgroundTint="@color/md_theme_gris_semiTransparent"
                 app:iconTint="@null"
-
                 android:layout_marginEnd="16dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:text="Facebook"
+                android:text="@string/btn_facebook"
+                android:textStyle="bold"
                 app:icon="@drawable/icon_fb"
                 app:iconGravity="textStart"
+                android:backgroundTint="@color/md_theme_gris_semiTransparent"
                 app:cornerRadius="24dp"
-                app:iconTint="@null"
-                />
+                app:iconTint="@null" />
         </LinearLayout>
 
     </LinearLayout>

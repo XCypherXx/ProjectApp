@@ -118,6 +118,7 @@
                 android:layout_width="140dp"
                 android:layout_height="70dp"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="-12dp"
                 android:text="@string/btn_ingresar"
                 android:textColor="@color/md_theme_onPrimary"
                 android:textSize="20sp"
@@ -125,14 +126,87 @@
                 app:cornerRadius="16dp" />
         </LinearLayout>
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/textView_crearCuenta"
-            android:layout_width="wrap_content"
+        <!-- Contenedor para la sección de "Ingresar con" y los botones -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="132dp"
-            android:text="@string/lbl_crear_cuenta"
-            android:textColor="@color/md_theme_onPrimary"
-            android:textSize="16sp" />
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
+
+            <!-- Línea y texto "Ingresar con" -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="5dp">
+                <!-- Línea izquierda -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:background="@color/md_theme_outline" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbl_ingre_con"
+                    android:textColor="@color/md_theme_outlineVariant"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+                <!-- Línea derecha -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:background="@color/md_theme_outline" />
+            </LinearLayout>
+
+            <!-- Contenedor vertical para los botones de redes sociales -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingStart="45dp"
+                android:paddingEnd="45dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoogle"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/btn_ingre_google"
+                    android:backgroundTint="@color/md_theme_gris_semiTransparent"
+                    android:textColor="@android:color/white"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/icon_google"
+                    app:iconGravity="textStart"
+                    android:textStyle="bold"
+                    app:iconTint="@null" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFacebook"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="15dp"
+                    android:text="@string/btn_ingre_facebook"
+                    android:backgroundTint="@color/md_theme_gris_semiTransparent"
+                    android:textColor="@android:color/white"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/icon_fb"
+                    app:iconGravity="textStart"
+                    android:textStyle="bold"
+                    app:iconTint="@null" />
+            </LinearLayout>
+
+        </LinearLayout>
+
     </FrameLayout>
 </LinearLayout>

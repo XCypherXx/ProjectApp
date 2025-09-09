@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Esquinas redondeadas -->
+    <corners android:radius="16dp" />
+    <!-- Color de fondo gris oscuro semitransparente -->
+    <solid android:color="@color/md_theme_gris_semiTransparent" />
+</shape>
