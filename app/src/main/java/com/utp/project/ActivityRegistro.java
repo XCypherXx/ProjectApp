@@ -2,6 +2,8 @@ package com.utp.project;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -25,10 +27,12 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 public class ActivityRegistro extends AppCompatActivity {
 
-
     private static final int RC_SIGN_IN = 9001;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
+
+    private MaterialButton btnRegistrarse;
+    private CheckBox cbAceptarTerminos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +40,23 @@ public class ActivityRegistro extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_registro);
 
-// Initialize Firebase Auth
+        // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+
+        // Obtener referencias de los elementos del layout
+        btnRegistrarse = findViewById(R.id.btnRegistrarse);
+        cbAceptarTerminos = findViewById(R.id.cbAceptarTerminos);
+
+        // Deshabilitar el botón de registro por defecto
+        btnRegistrarse.setEnabled(false);
+
+        // Agregar listener al CheckBox para habilitar/deshabilitar el botón
+        cbAceptarTerminos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                btnRegistrarse.setEnabled(isChecked);
+            }
+        });
 
 
 
