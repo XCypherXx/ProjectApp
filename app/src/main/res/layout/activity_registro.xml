@@ -4,27 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="android:background=&quot;@drawable/bg_card&quot;" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@drawable/bg_gradient" />
+        android:background="@drawable/gradient_background" />
 
 
     <!-- Mitad inferior con bordes redondeados -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="355dp"
         android:layout_gravity="bottom"
-
         android:orientation="vertical"
-        android:background="@drawable/bg_bottom_half"
+        android:background="@drawable/half_bottom_background"
        />
 
     <ScrollView
@@ -65,7 +58,7 @@
         android:layout_margin="24dp"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="@drawable/bg_card">
+        android:background="@drawable/rounded_background">
 
         <TextView
             android:layout_width="wrap_content"
@@ -83,9 +76,9 @@
             android:layout_height="50dp"
             android:hint="Usuario"
             android:padding="12dp"
-            android:background="@drawable/bg_input"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_onPrimary"
             android:layout_marginBottom="12dp"/>
 
         <!-- Contraseña -->
@@ -95,9 +88,9 @@
             android:hint="Contraseña"
             android:padding="12dp"
             android:inputType="textPassword"
-            android:background="@drawable/bg_input"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_onPrimary"
             android:layout_marginBottom="12dp"/>
 
         <!-- Confirmar contraseña -->
@@ -107,9 +100,9 @@
             android:hint="Confirma tu contraseña"
             android:padding="12dp"
             android:inputType="textPassword"
-            android:background="@drawable/bg_input"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_onPrimary"
             android:layout_marginBottom="12dp"/>
 
         <!-- Correo -->
@@ -119,9 +112,9 @@
             android:hint="Correo Electrónico"
             android:padding="12dp"
             android:inputType="textEmailAddress"
-            android:background="@drawable/bg_input"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_onPrimary"
             android:layout_marginBottom="12dp"/>
 
         <!-- Número -->
@@ -131,9 +124,9 @@
             android:hint="Número"
             android:padding="12dp"
             android:inputType="phone"
-            android:background="@drawable/bg_input"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_onPrimary"
             android:layout_marginBottom="16dp"/>
 
         <!-- CheckBox -->
@@ -141,7 +134,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="He leído y acepto los términos y condiciones de uso."
-            android:textColor="@android:color/white"
+            android:textColor="@color/md_theme_onPrimary"
             android:textSize="12sp" />
 
         <!-- Botón Registrar -->

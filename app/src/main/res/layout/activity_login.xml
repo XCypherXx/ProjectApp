@@ -116,7 +116,7 @@
                 android:id="@+id/button_ingresar"
                 style="@style/RegistroButton"
                 android:layout_width="140dp"
-                android:layout_height="50dp"
+                android:layout_height="70dp"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/btn_ingresar"
                 android:textColor="@color/md_theme_onPrimary"
