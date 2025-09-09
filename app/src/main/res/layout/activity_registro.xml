@@ -78,7 +78,7 @@
             android:padding="12dp"
             android:background="@drawable/rounded_edittext"
             android:textColor="@color/md_theme_onPrimary"
-            android:textColorHint="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_outline"
             android:layout_marginBottom="12dp"/>
 
         <!-- Contraseña -->
@@ -90,7 +90,7 @@
             android:inputType="textPassword"
             android:background="@drawable/rounded_edittext"
             android:textColor="@color/md_theme_onPrimary"
-            android:textColorHint="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_outline"
             android:layout_marginBottom="12dp"/>
 
         <!-- Confirmar contraseña -->
@@ -102,7 +102,7 @@
             android:inputType="textPassword"
             android:background="@drawable/rounded_edittext"
             android:textColor="@color/md_theme_onPrimary"
-            android:textColorHint="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_outline"
             android:layout_marginBottom="12dp"/>
 
         <!-- Correo -->
@@ -114,7 +114,7 @@
             android:inputType="textEmailAddress"
             android:background="@drawable/rounded_edittext"
             android:textColor="@color/md_theme_onPrimary"
-            android:textColorHint="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_outline"
             android:layout_marginBottom="12dp"/>
 
         <!-- Número -->
@@ -126,7 +126,7 @@
             android:inputType="phone"
             android:background="@drawable/rounded_edittext"
             android:textColor="@color/md_theme_onPrimary"
-            android:textColorHint="@color/md_theme_onPrimary"
+            android:textColorHint="@color/md_theme_outline"
             android:layout_marginBottom="16dp"/>
 
         <!-- CheckBox -->
