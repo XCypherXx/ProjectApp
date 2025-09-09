@@ -11,12 +11,26 @@
         android:id="@+id/logo"
         android:layout_width="140dp"
         android:layout_height="140dp"
-        android:src="@drawable/icono_agenda"
+        android:layout_marginBottom="70dp"
         android:contentDescription="@string/app_name"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/icono_agenda"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/loading"
+        android:layout_width="220dp"
+        android:layout_height="180dp"
+        android:layout_marginBottom="-120dp"
+        app:lottie_fileName="loading_lottie.json"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Texto debajo del logo -->
     <TextView
@@ -30,7 +44,7 @@
         app:layout_constraintTop_toBottomOf="@id/logo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="160dp" />
+        android:layout_marginTop="200dp" />
     <!-- Texto debajo del logo -->
     <TextView
         android:id="@+id/nameCreater1"
@@ -43,7 +57,7 @@
         app:layout_constraintTop_toBottomOf="@id/logo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="220dp"
         android:textStyle="bold" />
 
     <TextView
@@ -57,7 +71,7 @@
         app:layout_constraintTop_toBottomOf="@id/logo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="240dp"
         android:textStyle="bold" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
