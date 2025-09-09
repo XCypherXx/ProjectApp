@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int SPLASH_TIME = 4000;
+    private static final int SPLASH_TIME = 5000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
