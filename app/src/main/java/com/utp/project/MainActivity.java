@@ -64,13 +64,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         new Handler().postDelayed(() -> {
-            // Siempre abrir ActivityRegistro después del splash
-            startActivity(new Intent(MainActivity.this, ActivityRegistro.class));
+            // Ahora se abrirá la pantalla del menú después del splash
+            startActivity(new Intent(MainActivity.this, MenuActivity.class));
             finish(); // cerrar splash
         }, SPLASH_TIME);
-
-
     }
-
-
 }
