@@ -11,45 +11,62 @@
     android:background="@drawable/gradient_background"
     tools:context=".MenuActivity">
 
-    <!-- Logo de la aplicación -->
-    <ImageView
-        android:id="@+id/imageView_logo"
-        android:layout_width="250dp"
-        android:layout_height="150dp"
-        android:src="@drawable/logo_agenda"
-        android:layout_marginTop="70dp"/>
+    <!-- Sección del logo (20% del alto) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:gravity="center">
 
-    <!-- Nombre de la aplicación -->
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/textView_tituloApp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-10dp"
-        android:text="@string/app_name"
-        android:textColor="@color/md_theme_onPrimary"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        />
+        <ImageView
+            android:id="@+id/imageView_logo"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:src="@drawable/logo_agenda"/>
+    </LinearLayout>
 
-    <!-- Animación Lottie -->
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/lottie_animation"
-        android:layout_width="300dp"
-        android:layout_height="335dp"
-        app:lottie_fileName="calendar_animation.json"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="true"
-        android:layout_marginTop="20dp"/>
+    <!-- Texto del título (10% del alto) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center">
 
-    <!-- Contenedor para el rectángulo de fondo y el formulario -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/textView_tituloApp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textSize="25sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- Animación Lottie (40% del alto) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:gravity="center">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottie_animation"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
+            android:adjustViewBounds="true"
+            app:lottie_fileName="calendar_animation.json"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"/>
+    </LinearLayout>
+
+    <!-- Sección inferior: fondo redondeado + botones (30% del alto) -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="270dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginBottom="80dp"
-        >
+        android:layout_height="0dp"
+        android:layout_weight="3">
 
-        <!-- Rectángulo de fondo gris con esquinas redondeadas -->
+        <!-- Rectángulo de fondo gris con esquinas redondeadas (anclado abajo) -->
         <View
             android:id="@+id/half_background_view"
             android:layout_width="match_parent"
@@ -57,26 +74,22 @@
             android:layout_gravity="bottom"
             android:background="@drawable/half_bottom_background" />
 
-        <!-- Contenedor de los botones-->
+        <!-- Contenedor de los botones, centrado y encima del fondo -->
         <LinearLayout
             android:id="@+id/buttons_container"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="30dp"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingStart="30dp"
+            android:paddingEnd="30dp" >
 
-            <!-- FrameLayout para aplicar el degradado -->
+            <!-- Botón Registrarse -->
             <FrameLayout
                 android:layout_width="250dp"
                 android:layout_height="70dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="40dp"
-                android:layout_marginBottom="30dp"
-                android:background="@drawable/gradient_button"
-                app:cornerRadius="100dp">
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/gradient_button">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_registrarse"
@@ -85,19 +98,16 @@
                     android:background="@drawable/ripple_effect"
                     android:text="@string/btn_registrar"
                     android:textColor="@color/md_theme_onPrimary"
-                    android:textSize="27sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
-                    app:cornerRadius="100dp" />
-
+                    app:cornerRadius="100dp"/>
             </FrameLayout>
 
+            <!-- Botón Ingresar -->
             <FrameLayout
                 android:layout_width="250dp"
                 android:layout_height="70dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="-100dp"
-                android:background="@drawable/rounded_border_button"
-                app:cornerRadius="100dp">
+                android:background="@drawable/rounded_border_button">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_iniciar_sesion"
@@ -106,11 +116,12 @@
                     android:background="@drawable/ripple_effect"
                     android:text="@string/btn_ingresar"
                     android:textColor="@color/md_theme_onPrimary"
-                    android:textSize="27sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
-                    app:cornerRadius="100dp" />
-
+                    app:cornerRadius="100dp"/>
             </FrameLayout>
+
         </LinearLayout>
     </FrameLayout>
+
 </LinearLayout>
