@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/menu"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    tools:context=".MenuActivity">
+
+    <!-- Logo de la aplicación -->
+    <ImageView
+        android:id="@+id/imageView_logo"
+        android:layout_width="250dp"
+        android:layout_height="150dp"
+        android:src="@drawable/logo_agenda"
+        android:layout_marginTop="70dp"/>
+
+    <!-- Nombre de la aplicación -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textView_tituloApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-10dp"
+        android:text="@string/app_name"
+        android:textColor="@color/md_theme_onPrimary"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        />
+
+    <!-- Animación Lottie -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottie_animation"
+        android:layout_width="300dp"
+        android:layout_height="335dp"
+        app:lottie_fileName="calendar_animation.json"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Contenedor para el rectángulo de fondo y el formulario -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="270dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="80dp"
+        >
+
+        <!-- Rectángulo de fondo gris con esquinas redondeadas -->
+        <View
+            android:id="@+id/half_background_view"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/half_bottom_background" />
+
+        <!-- Contenedor de los botones-->
+        <LinearLayout
+            android:id="@+id/buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="30dp"
+            android:orientation="vertical">
+
+            <!-- FrameLayout para aplicar el degradado -->
+            <FrameLayout
+                android:layout_width="250dp"
+                android:layout_height="70dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="30dp"
+                android:background="@drawable/gradient_button"
+                app:cornerRadius="100dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_registrarse"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/ripple_effect"
+                    android:text="@string/btn_registrar"
+                    android:textColor="@color/md_theme_onPrimary"
+                    android:textSize="27sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="100dp" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="250dp"
+                android:layout_height="70dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="-100dp"
+                android:background="@drawable/rounded_border_button"
+                app:cornerRadius="100dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_iniciar_sesion"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/ripple_effect"
+                    android:text="@string/btn_ingresar"
+                    android:textColor="@color/md_theme_onPrimary"
+                    android:textSize="27sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="100dp" />
+
+            </FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

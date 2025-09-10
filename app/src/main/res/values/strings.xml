@@ -2,18 +2,22 @@
     <!-- Variables generales -->
     <string name="app_name">AgendaVoice</string>
     <string name="developer1">Anthony Condori Guillén</string>
-    <string name="developer2">Sarain Solansh</string>
+    <string name="developer2">Sarain Mamani Lucas</string>
     <string name="desarrollo">Desarrollado por</string>
     <string name="version">versión 1.0.0</string>
 
     <!-- Crear variables para el Login -->
-    <string name="titulo_login">Inicie Sesión</string>
+    <string name="titulo_login">Iniciar Sesión</string>
     <string name="lbl_usuario">Usuario</string>
     <string name="lbl_password">Contraseña</string>
     <string name="txt_usuario">Ingresar Usuario</string>
     <string name="txt_password">Ingresar Contraseña</string>
     <string name="btn_ingresar">Ingresar</string>
-    <string name="lbl_crear_cuenta">¿No tienes cuenta? Regístrate</string>
+    <string name="btn_facebook">Facebook</string>
+    <string name="btn_ingre_google">Ingresar sesión con Google</string>
+    <string name="btn_ingre_facebook">Ingresar sesión con Facebook</string>
+    <string name="btn_google">Google</string>
+    <string name="lbl_ingre_con">Ingresa con</string>
 
     <!-- Registro -->
     <string name="titulo_registro">Crear Cuenta</string>
@@ -31,6 +35,8 @@
     <string name="txt_confirmar_password">Reingresar contraseña</string>
     <string name="btn_registrar">Registrarse</string>
     <string name="lbl_tengo_cuenta">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="lbl_registrate_con">O registrate con</string>
+    <string name="lbl_terminos_condiciones">He leído y acepto los términos y condiciones de uso.</string>
 <string name="default_web_client_id">500031057257-q0mnkludpm2edejp41nq9gq28e6qd3rc.apps.googleusercontent.com</string>
     <string name="category_icon">Category icon</string>
   <string name="facebook_app_id">81929402052228</string>
