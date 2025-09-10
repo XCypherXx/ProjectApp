@@ -3,6 +3,7 @@ package com.utp.project;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,10 +18,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); // logo
 
-        new Handler().postDelayed(() -> {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // Siempre abrir ActivityRegistro después del splash
             startActivity(new Intent(MainActivity.this, ActivityRegistro.class));
-            finish(); // cerrar splash
+            finish();
         }, SPLASH_TIME);
     }
     }
