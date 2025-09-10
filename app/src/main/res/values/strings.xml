@@ -37,5 +37,10 @@
     <string name="lbl_tengo_cuenta">¿Ya tienes cuenta? Inicia sesión</string>
     <string name="lbl_registrate_con">O registrate con</string>
     <string name="lbl_terminos_condiciones">He leído y acepto los términos y condiciones de uso.</string>
-<string name="default_web_client_id">500031057257-q0mnkludpm2edejp41nq9gq28e6qd3rc.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">500031057257-q0mnkludpm2edejp41nq9gq28e6qd3rc.apps.googleusercontent.com</string>
+    <string name="category_icon">Category icon</string>
+    <string name="facebook_app_id">81929402052228</string>
+    <string name="fb_login_protocol_scheme">fb81929402052228</string>
+
+
 </resources>

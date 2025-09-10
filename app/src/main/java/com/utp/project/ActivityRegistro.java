@@ -1,6 +1,7 @@
 package com.utp.project;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -42,7 +43,7 @@ public class ActivityRegistro extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-
+        mAuth.signOut(); //prueba
         // Obtener referencias de los elementos del layout
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
         cbAceptarTerminos = findViewById(R.id.cbAceptarTerminos);
@@ -59,24 +60,18 @@ public class ActivityRegistro extends AppCompatActivity {
         });
 
 
-
-
-
-
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id)) // el token que te da Firebase
                 .requestEmail()
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
+//prueba
+        mGoogleSignInClient.signOut();
 
         // btn de Google
         MaterialButton btnGoogle = findViewById(R.id.btnGoogle);
         btnGoogle.setOnClickListener(view -> signIn());
-
-
 
 
     }
@@ -112,8 +107,7 @@ public class ActivityRegistro extends AppCompatActivity {
                         // Si ya hay sesión activa, ir a home desde el btn
 
                         if (mAuth.getCurrentUser() != null) {
-                            startActivity(new Intent(this, HomeActivity.class));
-                            finish();
+                            openNextScreen(); // manejar onboarding o home
                             return;
                         }
 
@@ -125,6 +119,24 @@ public class ActivityRegistro extends AppCompatActivity {
     }
 
 
+    private void openNextScreen() {
+        SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+        boolean isFirstTime = prefs.getBoolean("isFirstTime", true);
+
+        if (isFirstTime) {
+            // Guardar que ya vio onboarding
+            prefs.edit().putBoolean("isFirstTime", false).apply();
+
+            // Abrir onboarding
+            Intent intent = new Intent(ActivityRegistro.this, OnboardingActivity.class);
+            startActivity(intent);
+        } else {
+            // Abrir Home directamente
+            Intent intent = new Intent(ActivityRegistro.this, HomeActivity.class);
+            startActivity(intent);
+        }
+        finish();
+    }
 
 
 }
