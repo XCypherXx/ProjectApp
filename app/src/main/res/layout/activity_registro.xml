@@ -72,6 +72,7 @@
 
         <!-- Usuario -->
         <EditText
+            android:id="@+id/editText_usuario"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="@string/lbl_usuario_reg"
@@ -83,6 +84,7 @@
 
         <!-- Contraseña -->
         <EditText
+            android:id="@+id/editText_password"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="@string/lbl_password"
@@ -95,6 +97,7 @@
 
         <!-- Confirmar contraseña -->
         <EditText
+            android:id="@+id/editText_confirmPassword"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="@string/lbl_confirmar_password"

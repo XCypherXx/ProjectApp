@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Toast;
+import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,8 @@ public class ActivityRegistro extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
 
+    // Declaración de variables
+    private EditText editTextUsuario, editTextPassword, editTextConfirmPassword;
     private MaterialButton btnRegistrarse;
     private CheckBox cbAceptarTerminos;
 
@@ -47,6 +50,39 @@ public class ActivityRegistro extends AppCompatActivity {
         // Obtener referencias de los elementos del layout
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
         cbAceptarTerminos = findViewById(R.id.cbAceptarTerminos);
+        // Referencias correctas
+        editTextUsuario = findViewById(R.id.editText_usuario);
+        editTextPassword = findViewById(R.id.editText_password);
+        editTextConfirmPassword = findViewById(R.id.editText_confirmPassword);
+        btnRegistrarse = findViewById(R.id.btnRegistrarse);
+
+        btnRegistrarse.setOnClickListener(v -> {
+            String username = editTextUsuario.getText().toString().trim();
+            String password = editTextPassword.getText().toString().trim();
+            String confirmPassword = editTextConfirmPassword.getText().toString().trim();
+
+            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!password.equals(confirmPassword)) {
+                editTextConfirmPassword.setError("Las contraseñas no coinciden");
+                return;
+            }
+
+            // Guardar en SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            prefs.edit()
+                    .putString("username", username)
+                    .putString("password", password)
+                    .apply();
+
+            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
 
         // Deshabilitar el botón de registro por defecto
         btnRegistrarse.setEnabled(false);
@@ -59,23 +95,18 @@ public class ActivityRegistro extends AppCompatActivity {
             }
         });
 
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id)) // el token que te da Firebase
                 .requestEmail()
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-//prueba
+        //prueba
         mGoogleSignInClient.signOut();
-
         // btn de Google
         MaterialButton btnGoogle = findViewById(R.id.btnGoogle);
         btnGoogle.setOnClickListener(view -> signIn());
-
-
     }
-
 
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -110,14 +141,11 @@ public class ActivityRegistro extends AppCompatActivity {
                             openNextScreen(); // manejar onboarding o home
                             return;
                         }
-
-
                     } else {
                         Toast.makeText(this, "Falló el inicio de sesión", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
 
     private void openNextScreen() {
         SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
@@ -126,7 +154,6 @@ public class ActivityRegistro extends AppCompatActivity {
         if (isFirstTime) {
             // Guardar que ya vio onboarding
             prefs.edit().putBoolean("isFirstTime", false).apply();
-
             // Abrir onboarding
             Intent intent = new Intent(ActivityRegistro.this, OnboardingActivity.class);
             startActivity(intent);
@@ -137,6 +164,4 @@ public class ActivityRegistro extends AppCompatActivity {
         }
         finish();
     }
-
-
 }
