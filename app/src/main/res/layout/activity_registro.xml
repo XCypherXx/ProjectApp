@@ -90,6 +90,11 @@
             android:layout_marginBottom="12dp"
             app:endIconMode="password_toggle"
             app:endIconTint="@color/md_theme_onPrimary"
+            app:boxBackgroundColor="#66FFFFFF"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -98,7 +103,6 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/lbl_password"
                 android:inputType="textPassword"
-                android:background="@drawable/rounded_edittext"
                 android:textColor="@color/md_theme_onPrimary"
                 android:textColorHint="@color/md_theme_outline" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -111,6 +115,11 @@
             android:layout_marginBottom="12dp"
             app:endIconMode="password_toggle"
             app:endIconTint="@color/md_theme_onPrimary"
+            app:boxBackgroundColor="#66FFFFFF"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -119,7 +128,6 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/lbl_confirmar_password"
                 android:inputType="textPassword"
-                android:background="@drawable/rounded_edittext"
                 android:textColor="@color/md_theme_onPrimary"
                 android:textColorHint="@color/md_theme_outline" />
         </com.google.android.material.textfield.TextInputLayout>
