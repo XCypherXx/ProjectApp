@@ -3,7 +3,6 @@ package com.utp.project;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -41,6 +40,10 @@ public class ActivityRegistro extends AppCompatActivity {
     private MaterialButton btnRegistrarse;
     private CheckBox cbAceptarTerminos;
 
+    // Referencias a los TextInputLayout
+    private TextInputLayout textInputLayoutPassword;
+    private TextInputLayout textInputLayoutConfirmPassword;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,10 +62,18 @@ public class ActivityRegistro extends AppCompatActivity {
         editTextConfirmPassword = findViewById(R.id.editText_confirmPassword);
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
 
+        // Referencias a los TextInputLayout para manejo de errores
+        textInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
+        textInputLayoutConfirmPassword = findViewById(R.id.textInputLayoutConfirmPassword);
+
         btnRegistrarse.setOnClickListener(v -> {
             String username = editTextUsuario.getText().toString().trim();
             String password = editTextPassword.getText().toString().trim();
             String confirmPassword = editTextConfirmPassword.getText().toString().trim();
+
+            // Limpiar errores anteriores
+            textInputLayoutPassword.setError(null);
+            textInputLayoutConfirmPassword.setError(null);
 
             if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show();
@@ -70,7 +81,7 @@ public class ActivityRegistro extends AppCompatActivity {
             }
 
             if (!password.equals(confirmPassword)) {
-                editTextConfirmPassword.setError("Las contraseñas no coinciden");
+                textInputLayoutConfirmPassword.setError("Las contraseñas no coinciden");
                 return;
             }
 
