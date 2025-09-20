@@ -71,16 +71,21 @@
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayoutUsuario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
+                app:boxBackgroundColor="#66FFFFFF"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editText_usuario"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@drawable/rounded_edittext"
+                    android:layout_height="wrap_content"
                     android:drawableStart="@drawable/baseline_person_24"
                     android:drawablePadding="8dp"
                     android:hint="@string/lbl_usuario"
@@ -92,16 +97,23 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayoutPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
+                app:endIconMode="password_toggle"
+                app:endIconTint="@color/md_theme_onPrimary"
+                app:boxBackgroundColor="#66FFFFFF"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editText_password"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@drawable/rounded_edittext"
+                    android:layout_height="wrap_content"
                     android:drawableStart="@drawable/lock_keyhole"
                     android:drawablePadding="8dp"
                     android:hint="@string/lbl_password"
