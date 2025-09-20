@@ -3,6 +3,8 @@ package com.utp.project;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Toast;
@@ -22,6 +24,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,6 +40,8 @@ public class ActivityRegistro extends AppCompatActivity {
     private EditText editTextUsuario, editTextPassword, editTextConfirmPassword;
     private MaterialButton btnRegistrarse;
     private CheckBox cbAceptarTerminos;
+    private boolean isPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +60,40 @@ public class ActivityRegistro extends AppCompatActivity {
         editTextPassword = findViewById(R.id.editText_password);
         editTextConfirmPassword = findViewById(R.id.editText_confirmPassword);
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
+
+        // Referencias
+        TextInputLayout passwordLayout = findViewById(R.id.textInputLayoutPassword);
+        TextInputLayout confirmPasswordLayout = findViewById(R.id.textInputLayoutConfirmPassword);
+
+        // Toggle para contraseña principal
+        passwordLayout.setEndIconOnClickListener(v -> {
+            if (isPasswordVisible) {
+                // Ocultar
+                editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                passwordLayout.setEndIconDrawable(R.drawable.ic_eye_closed);
+            } else {
+                // Mostrar
+                editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                passwordLayout.setEndIconDrawable(R.drawable.ic_eye_open);
+            }
+            // Mover cursor al final
+            editTextPassword.setSelection(editTextPassword.length());
+            isPasswordVisible = !isPasswordVisible;
+        });
+
+        // Toggle para confirmar contraseña
+        confirmPasswordLayout.setEndIconOnClickListener(v -> {
+            if (isConfirmPasswordVisible) {
+                editTextConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                confirmPasswordLayout.setEndIconDrawable(R.drawable.ic_eye_closed);
+            } else {
+                editTextConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                confirmPasswordLayout.setEndIconDrawable(R.drawable.ic_eye_open);
+            }
+            editTextConfirmPassword.setSelection(editTextConfirmPassword.length());
+            isConfirmPasswordVisible = !isConfirmPasswordVisible;
+        });
+
 
         btnRegistrarse.setOnClickListener(v -> {
             String username = editTextUsuario.getText().toString().trim();
