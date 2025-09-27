@@ -39,8 +39,10 @@
     <string name="lbl_terminos_condiciones">He leído y acepto los términos y condiciones de uso.</string>
     <string name="default_web_client_id">500031057257-q0mnkludpm2edejp41nq9gq28e6qd3rc.apps.googleusercontent.com</string>
     <string name="category_icon">Category icon</string>
-    <string name="facebook_app_id">81929402052228</string>
-    <string name="fb_login_protocol_scheme">fb81929402052228</string>
+    <!-- MODIFICACIÓN: INSERTA TUS VALORES REALES DE META -->
+    <string name="facebook_app_id">1117855066728102</string>
+    <string name="fb_login_protocol_scheme">fb1117855066728102</string>
+    <string name="facebook_client_token">e0e86daf4f95f978a812bd49f6eef350</string>
 
 
 </resources>

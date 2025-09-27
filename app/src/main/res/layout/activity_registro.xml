@@ -231,6 +231,7 @@
                 android:layout_marginEnd="16dp" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFacebook"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:text="@string/btn_facebook"
