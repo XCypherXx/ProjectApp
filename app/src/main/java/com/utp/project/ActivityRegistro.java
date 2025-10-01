@@ -29,6 +29,17 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import com.google.firebase.auth.FacebookAuthProvider;
+import java.util.Arrays;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.appevents.AppEventsLogger;
+import android.util.Log;
+
 public class ActivityRegistro extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 9001;
@@ -43,12 +54,19 @@ public class ActivityRegistro extends AppCompatActivity {
     // Referencias a los TextInputLayout
     private TextInputLayout textInputLayoutPassword;
     private TextInputLayout textInputLayoutConfirmPassword;
+    private CallbackManager mCallbackManager;
+    private MaterialButton btnFacebook;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_registro);
+
+        // [FACEBOOK] Inicialización del SDK y CallbackManager
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(getApplication());
+        mCallbackManager = CallbackManager.Factory.create();
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -65,6 +83,9 @@ public class ActivityRegistro extends AppCompatActivity {
         // Referencias a los TextInputLayout para manejo de errores
         textInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
         textInputLayoutConfirmPassword = findViewById(R.id.textInputLayoutConfirmPassword);
+
+        // Botones Sociales
+        btnFacebook = findViewById(R.id.btnFacebook);
 
         btnRegistrarse.setOnClickListener(v -> {
             String username = editTextUsuario.getText().toString().trim();
@@ -109,6 +130,30 @@ public class ActivityRegistro extends AppCompatActivity {
             }
         });
 
+        // [FACEBOOK] Listener para el botón de Facebook
+        btnFacebook.setOnClickListener(view -> loginWithFacebook());
+
+        // [FACEBOOK] Registro del Callback para Facebook
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                // Si el login de FB es exitoso, pasa el token a Firebase
+                Log.d("FacebookAuth", "Facebook login exitoso. Token: " + loginResult.getAccessToken().getToken());
+                handleFacebookAccessToken(loginResult.getAccessToken().getToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(ActivityRegistro.this, "Inicio de sesión con Facebook cancelado", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.e("FacebookAuth", "Error en login de Facebook", error);
+                Toast.makeText(ActivityRegistro.this, "Error de Facebook: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id)) // el token que te da Firebase
                 .requestEmail()
@@ -127,16 +172,47 @@ public class ActivityRegistro extends AppCompatActivity {
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    private void loginWithFacebook() {
+        // Pedir permisos de email y perfil público
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
+    }
+
+    private void handleFacebookAccessToken(String token) {
+        // Usa el token de Facebook para obtener una credencial de Firebase
+        AuthCredential credential = FacebookAuthProvider.getCredential(token);
+
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        Toast.makeText(this, "Inicio de sesión exitoso con Facebook: " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+
+                        if (mAuth.getCurrentUser() != null) {
+                            openNextScreen();
+                            return;
+                        }
+                    } else {
+                        Log.e("FacebookAuth", "Falló la autenticación de Firebase con Facebook", task.getException());
+                        Toast.makeText(this, "Falló la autenticación de Firebase con Facebook: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // 1. Pasa el resultado a CallbackManager de Facebook. (NUEVO)
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+
+        // 2. Maneja el resultado de Google (EXISTENTE)
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
+                // The ApiException status code indicates the detailed failure reason.
                 Toast.makeText(this, "Error en Google Sign-In: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
