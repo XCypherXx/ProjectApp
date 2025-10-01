@@ -23,7 +23,7 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
     @Override
     public OnboardingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.activity_onboarding, parent, false); // layout genérico
+                .inflate(R.layout.item_onboarding, parent, false); // layout genérico item
         return new OnboardingViewHolder(view);
     }
 
@@ -46,9 +46,9 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
 
         OnboardingViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleText = itemView.findViewById(R.id.title_text);
-            descriptionText = itemView.findViewById(R.id.description_text);
-            imageView = itemView.findViewById(R.id.onboarding_illustration);
+            titleText = itemView.findViewById(R.id.titleOnboarding);
+            descriptionText = itemView.findViewById(R.id.descriptionOnboarding);
+            imageView = itemView.findViewById(R.id.imageOnboarding);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.utp.project;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
@@ -64,8 +65,19 @@ public class MainActivity extends AppCompatActivity {
         });
 
         new Handler().postDelayed(() -> {
-            // Ahora se abrirá la pantalla del menú después del splash
-            startActivity(new Intent(MainActivity.this, MenuActivity.class));
+            SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+            // Fuerza a true siempre mientras pruebas
+           // prefs.edit().putBoolean("isFirstTime", true).apply();
+
+            boolean isFirstTime = prefs.getBoolean("isFirstTime", true);
+
+            if (isFirstTime) {
+                // Abre el Onboarding siempre
+                startActivity(new Intent(MainActivity.this, OnboardingActivity.class));
+            } else {
+                // Si ya lo vio, abre el menú
+                startActivity(new Intent(MainActivity.this, MenuActivity.class));
+            }
             finish(); // cerrar splash
         }, SPLASH_TIME);
     }

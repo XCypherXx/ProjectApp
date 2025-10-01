@@ -90,12 +90,12 @@ public class ActivityRegistro extends AppCompatActivity {
             prefs.edit()
                     .putString("username", username)
                     .putString("password", password)
+                    .putString("currentUser", username)
+                    // .putBoolean("isFirstTime", true)
                     .apply();
 
             Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+            openNextScreen(username);
         });
 
         // Deshabilitar el botón de registro por defecto
@@ -152,7 +152,7 @@ public class ActivityRegistro extends AppCompatActivity {
                         // Si ya hay sesión activa, ir a home desde el btn
 
                         if (mAuth.getCurrentUser() != null) {
-                            openNextScreen(); // manejar onboarding o home
+                            openNextScreen(user.getUid()); // manejar onboarding o home
                             return;
                         }
                     } else {
@@ -161,10 +161,15 @@ public class ActivityRegistro extends AppCompatActivity {
                 });
     }
 
-    private void openNextScreen() {
-        SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
-        boolean isFirstTime = prefs.getBoolean("isFirstTime", true);
+    private void openNextScreen(String userId) {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+    // una sola bandera
+        //boolean isFirstTime = prefs.getBoolean("isFirstTime", true);
 
+        //   para el onboarding  clave única por usuario
+        String key = "isFirstTime_" + userId;
+
+        boolean isFirstTime = prefs.getBoolean(key, true);
         if (isFirstTime) {
             // Guardar que ya vio onboarding
             prefs.edit().putBoolean("isFirstTime", false).apply();
