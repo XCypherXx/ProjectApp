@@ -12,7 +12,6 @@ import android.widget.EditText;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -46,94 +45,80 @@ public class ActivityRegistro extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
 
+    // Variable para manejar callbacks del SDK de Facebook
+    private CallbackManager mCallbackManager;
+
     // Declaración de variables
     private EditText editTextUsuario, editTextPassword, editTextConfirmPassword;
-    private MaterialButton btnRegistrarse;
+    private MaterialButton btnRegistrarse, btnGoogle, btnFacebook;
     private CheckBox cbAceptarTerminos;
-
-    // Referencias a los TextInputLayout
-    private TextInputLayout textInputLayoutPassword;
-    private TextInputLayout textInputLayoutConfirmPassword;
-    private CallbackManager mCallbackManager;
-    private MaterialButton btnFacebook;
+    private TextInputLayout textInputLayoutPassword, textInputLayoutConfirmPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Inicialización de Firebase
+        mAuth = FirebaseAuth.getInstance();
+
+        // [COMPROBACIÓN DE SESIÓN] Si el usuario ya está logueado, saltar a la siguiente pantalla
+        if (mAuth.getCurrentUser() != null) {
+            openNextScreen();
+            return;
+        }
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_registro);
 
-        // [FACEBOOK] Inicialización del SDK y CallbackManager
+        // Inicialización del SDK de Facebook
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(getApplication());
         mCallbackManager = CallbackManager.Factory.create();
 
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
-        mAuth.signOut(); //prueba
-        // Obtener referencias de los elementos del layout
-        btnRegistrarse = findViewById(R.id.btnRegistrarse);
-        cbAceptarTerminos = findViewById(R.id.cbAceptarTerminos);
-        // Referencias correctas
+        // Configuración de Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        // Obtener referencias de la UI
         editTextUsuario = findViewById(R.id.editText_usuario);
         editTextPassword = findViewById(R.id.editText_password);
         editTextConfirmPassword = findViewById(R.id.editText_confirmPassword);
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
-
-        // Referencias a los TextInputLayout para manejo de errores
+        cbAceptarTerminos = findViewById(R.id.cbAceptarTerminos);
         textInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
         textInputLayoutConfirmPassword = findViewById(R.id.textInputLayoutConfirmPassword);
 
         // Botones Sociales
+        btnGoogle = findViewById(R.id.btnGoogle);
+        // Nota: Asegúrate que tu activity_registro.xml tenga el id btnFacebook
         btnFacebook = findViewById(R.id.btnFacebook);
 
-        btnRegistrarse.setOnClickListener(v -> {
-            String username = editTextUsuario.getText().toString().trim();
-            String password = editTextPassword.getText().toString().trim();
-            String confirmPassword = editTextConfirmPassword.getText().toString().trim();
-
-            // Limpiar errores anteriores
-            textInputLayoutPassword.setError(null);
-            textInputLayoutConfirmPassword.setError(null);
-
-            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (!password.equals(confirmPassword)) {
-                textInputLayoutConfirmPassword.setError("Las contraseñas no coinciden");
-                return;
-            }
-
-            // Guardar en SharedPreferences
-            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-            prefs.edit()
-                    .putString("username", username)
-                    .putString("password", password)
-                    .apply();
-
-            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        });
-
-        // Deshabilitar el botón de registro por defecto
-        btnRegistrarse.setEnabled(false);
-
-        // Agregar listener al CheckBox para habilitar/deshabilitar el botón
+        // Listener para CheckBox de Términos y Condiciones
         cbAceptarTerminos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 btnRegistrarse.setEnabled(isChecked);
+                if (isChecked) {
+                    btnRegistrarse.setAlpha(1.0f); // Opacidad normal
+                } else {
+                    btnRegistrarse.setAlpha(0.5f); // Opacidad reducida
+                }
             }
         });
 
-        // [FACEBOOK] Listener para el botón de Facebook
+        // Listener del botón Registrarse (Email/Password)
+        btnRegistrarse.setOnClickListener(view -> registrarUsuario());
+
+        // Listener para botón de Google
+        btnGoogle.setOnClickListener(view -> signIn());
+
+        // Listener para el botón de Facebook
         btnFacebook.setOnClickListener(view -> loginWithFacebook());
 
-        // [FACEBOOK] Registro del Callback para Facebook
+        // Registro del Callback para Facebook
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -153,25 +138,78 @@ public class ActivityRegistro extends AppCompatActivity {
                 Toast.makeText(ActivityRegistro.this, "Error de Facebook: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id)) // el token que te da Firebase
-                .requestEmail()
-                .build();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        //prueba
-        mGoogleSignInClient.signOut();
-        // btn de Google
-        MaterialButton btnGoogle = findViewById(R.id.btnGoogle);
-        btnGoogle.setOnClickListener(view -> signIn());
     }
 
+    private void registrarUsuario() {
+        String email = editTextUsuario.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+        String confirmPassword = editTextConfirmPassword.getText().toString().trim();
+
+        if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            Toast.makeText(this, "Por favor, completa todos los campos.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            Toast.makeText(this, "Las contraseñas no coinciden.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(ActivityRegistro.this, "Registro exitoso con Email", Toast.LENGTH_SHORT).show();
+                        // Llama a la función de navegación única
+                        openNextScreen();
+                    } else {
+                        Toast.makeText(ActivityRegistro.this, "Fallo el registro: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    // Sobreescribir onActivityResult para manejar tanto Google como Facebook
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // 1. Pasa el resultado a CallbackManager de Facebook.
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+
+        // 2. Maneja el resultado de Google
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                firebaseAuthWithGoogle(account.getIdToken());
+            } catch (ApiException e) {
+                Toast.makeText(this, "Error en Google Sign-In: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Inicio de sesión con Google
     private void signIn() {
+        // test (opcional: limpiar sesión anterior de Google antes de iniciar)
+        mGoogleSignInClient.signOut();
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        Toast.makeText(this, "Inicio de sesión exitoso con Google: " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                        // Llama a la función de navegación única
+                        openNextScreen();
+                    } else {
+                        Toast.makeText(this, "Falló el inicio de sesión con Google: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    // MÉTODOS DE FACEBOOK
     private void loginWithFacebook() {
         // Pedir permisos de email y perfil público
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
@@ -186,11 +224,8 @@ public class ActivityRegistro extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(this, "Inicio de sesión exitoso con Facebook: " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-
-                        if (mAuth.getCurrentUser() != null) {
-                            openNextScreen();
-                            return;
-                        }
+                        // Llama a la función de navegación única
+                        openNextScreen();
                     } else {
                         Log.e("FacebookAuth", "Falló la autenticación de Firebase con Facebook", task.getException());
                         Toast.makeText(this, "Falló la autenticación de Firebase con Facebook: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
@@ -198,57 +233,19 @@ public class ActivityRegistro extends AppCompatActivity {
                 });
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // 1. Pasa el resultado a CallbackManager de Facebook. (NUEVO)
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-
-        // 2. Maneja el resultado de Google (EXISTENTE)
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account.getIdToken());
-            } catch (ApiException e) {
-                // The ApiException status code indicates the detailed failure reason.
-                Toast.makeText(this, "Error en Google Sign-In: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        Toast.makeText(this, "Inicio de sesión exitoso: " + user.getEmail(), Toast.LENGTH_SHORT).show();
-                        // Si ya hay sesión activa, ir a home desde el btn
-
-                        if (mAuth.getCurrentUser() != null) {
-                            openNextScreen(); // manejar onboarding o home
-                            return;
-                        }
-                    } else {
-                        Toast.makeText(this, "Falló el inicio de sesión", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
     private void openNextScreen() {
         SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+        // Lee si es la primera vez, el valor por defecto es 'true'
         boolean isFirstTime = prefs.getBoolean("isFirstTime", true);
 
         if (isFirstTime) {
-            // Guardar que ya vio onboarding
+            // Si es la primera vez, marcamos que ya vio el Onboarding
             prefs.edit().putBoolean("isFirstTime", false).apply();
-            // Abrir onboarding
+            // Abrir Onboarding
             Intent intent = new Intent(ActivityRegistro.this, OnboardingActivity.class);
             startActivity(intent);
         } else {
-            // Abrir Home directamente
+            // Si ya no es la primera vez, ir directo al Home
             Intent intent = new Intent(ActivityRegistro.this, HomeActivity.class);
             startActivity(intent);
         }
