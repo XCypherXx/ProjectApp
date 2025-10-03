@@ -1,5 +1,6 @@
 package com.utp.project;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -52,6 +53,13 @@ public class HomeActivity extends AppCompatActivity {
                         .circleCrop()
                         .into(profileImage);
             }
+        } else {
+            // Caso 2: Usuario registrado localmente
+            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            String currentUser = prefs.getString("currentUser", null);
+            userGreeting.setText("Hola, " + currentUser + " 👋");
+            //prueba por default
+            profileImage.setImageResource(R.drawable.ic_user_default);
         }
 
 

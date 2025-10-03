@@ -71,8 +71,13 @@
             android:layout_marginBottom="16dp" />
 
         <!-- Usuario -->
-        <EditText
-            android:id="@+id/editText_usuario"
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+           android:id="@+id/editText_usuario"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="@string/lbl_usuario_reg"
@@ -81,7 +86,7 @@
             android:textColor="@color/md_theme_onPrimary"
             android:textColorHint="@color/md_theme_outline"
             android:layout_marginBottom="12dp"/>
-
+    </com.google.android.material.textfield.TextInputLayout>
         <!-- Contraseña con ojo -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutPassword"
@@ -133,7 +138,12 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Correo -->
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="@string/lbl_correo"
@@ -143,9 +153,14 @@
             android:textColor="@color/md_theme_onPrimary"
             android:textColorHint="@color/md_theme_outline"
             android:layout_marginBottom="12dp"/>
-
+        </com.google.android.material.textfield.TextInputLayout>
         <!-- Número -->
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+            android:drawableStart="@drawable/baseline_person_24"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="@string/lbl_numero"
@@ -154,8 +169,9 @@
             android:background="@drawable/rounded_edittext"
             android:textColor="@color/md_theme_onPrimary"
             android:textColorHint="@color/md_theme_outline"
-            android:layout_marginBottom="16dp"/>
-
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"/>
+        </com.google.android.material.textfield.TextInputLayout>
         <!-- CheckBox -->
         <CheckBox
             android:id="@+id/cbAceptarTerminos"

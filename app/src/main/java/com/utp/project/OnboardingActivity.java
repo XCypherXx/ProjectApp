@@ -31,9 +31,9 @@ public class OnboardingActivity extends AppCompatActivity {
 
 
         items = new ArrayList<>();
-        items.add(new OnboardingItem(R.drawable.ic_call, "Llama fácil", "Haz llamadas directamente desde la app"));
-        items.add(new OnboardingItem(R.drawable.ic_calendar, "Agenda", "Revisa tus citas y tareas"));
-        items.add(new OnboardingItem(R.drawable.ic_home, "Inicio", "Accede rápido a todo lo que necesitas"));
+        items.add(new OnboardingItem(R.drawable.on1, "Organiza tus tareas",         "Anota tus pendientes y mantén todo bajo control en un solo lugar"));
+        items.add(new OnboardingItem(R.drawable.on2,    "Nunca olvides nada",  "Recibe recordatorios para tus tareas importantes en el momento justo"));
+        items.add(new OnboardingItem(R.drawable.on3, "Sigue tu progreso",         "Marca tareas completadas y visualiza tu avance con porcentajes"));
 
         adapter = new OnboardingAdapter(items);
         viewPager.setAdapter(adapter);
@@ -45,6 +45,15 @@ public class OnboardingActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 setCurrentIndicator(position);
+// btn siguiente
+                if (position == adapter.getItemCount() - 1) {
+                    nextButton.setText("Comenzar");
+                    skipButton.setVisibility(View.GONE);
+                } else {
+                    nextButton.setText("Siguiente");
+                    skipButton.setVisibility(View.VISIBLE);
+                }
+
             }
         });
 
