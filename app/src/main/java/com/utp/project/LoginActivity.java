@@ -96,6 +96,9 @@ public class LoginActivity extends AppCompatActivity {
                 String passwordIngresada = editTextPassword.getText().toString().trim();
 
                 SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                prefs.edit()
+                        .putString("currentUser", usuarioIngresado) //  loguea ahora
+                        .apply();
                 String usuarioGuardado = prefs.getString("username", "");
                 String passwordGuardada = prefs.getString("password", "");
 

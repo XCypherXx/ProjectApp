@@ -188,7 +188,7 @@ public class ActivityRegistro extends AppCompatActivity {
                         Toast.makeText(this, "Inicio de sesión exitoso con Facebook: " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
 
                         if (mAuth.getCurrentUser() != null) {
-                            openNextScreen();
+                            openNextScreen( user.getUid());
                             return;
                         }
                     } else {
