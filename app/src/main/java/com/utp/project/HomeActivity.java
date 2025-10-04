@@ -1,89 +1,83 @@
 package com.utp.project;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import android.app.ActivityOptions;
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.utp.project.databinding.ActivityHomeBinding;
 
 public class HomeActivity extends AppCompatActivity {
-    private RecyclerView categoryRecyclerView;
-    private CategoryAdapter categoryAdapter;
-    private ArrayList<Category> categoryList;
+    // private RecyclerView categoryRecyclerView;
+
+    private BottomNavigationView bottomNavigationView;
+    private FloatingActionButton fab;
+    private ActivityHomeBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_home);
+        // setContentView(R.layout.activity_home);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        binding = ActivityHomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+// Configuración de accesibilidad para FAB
+        binding.fab.setFocusable(true);
+        binding.fab.setClickable(true);
+        binding.fab.setContentDescription(getString(R.string.fab_add_task_description));
 
-        TextView userGreeting = findViewById(R.id.user_greeting);
-        ImageView profileImage = findViewById(R.id.profile_image);
-
-        if (user != null) {
-            // Mostrar nombre
-            String name = user.getDisplayName();
-            userGreeting.setText("Hola, " + name);
-
-            // Mostrar foto (si tiene)
-            if (user.getPhotoUrl() != null) {
-                Glide.with(this)
-                        .load(user.getPhotoUrl())
-                        .circleCrop()
-                        .into(profileImage);
-            }
-        } else {
-            // Caso 2: Usuario registrado localmente
-            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-            String currentUser = prefs.getString("currentUser", null);
-            userGreeting.setText("Hola, " + currentUser + " 👋");
-            //prueba por default
-            profileImage.setImageResource(R.drawable.ic_user_default);
-        }
-
-
-        categoryRecyclerView = findViewById(R.id.categoryRecyclerView);
-
-        // Lista de ejemplo
-        categoryList = new ArrayList<>();
-        categoryList.add(new Category("Work", R.drawable.ic_work, 2)); //  (Nombre, Icono, Tareas)
-        categoryList.add(new Category("Personal", R.drawable.ic_school, 1));
-        categoryList.add(new Category("Shopping", R.drawable.ic_home, 3));
-        categoryList.add(new Category("Health", R.drawable.ic_health, 0));
-
-        categoryAdapter = new CategoryAdapter(this, categoryList);
-        categoryRecyclerView.setAdapter(categoryAdapter);
-
-        // Layout horizontal slider de cards
-        LinearLayoutManager layoutManager =
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        categoryRecyclerView.setLayoutManager(layoutManager);
-
-        // Clicks en las cards
-        categoryAdapter.setOnItemClickListener(position -> {
-            Category clicked = categoryList.get(position);
-            Toast.makeText(this, "Clicked: " + clicked.getName(), Toast.LENGTH_SHORT).show();
+// Listener del FABB
+        binding.fab.setOnClickListener(v -> {
+            Toast.makeText(this, "FAB presionado", Toast.LENGTH_SHORT).show();
+            // Aquí puedes abrir un fragment o lanzar una Activity
         });
+
+
+        // -------------------
+        // BottomNavigation
+        // -------------------
+
+        // Pantalla inicial
+        replaceFragment(new HomeFragment()); // fragment inicial
+        binding.bottomNavigationView.setBackground(null);
+
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.home) {
+                replaceFragment(new HomeFragment());
+            } else if (id == R.id.agenda) {
+                replaceFragment(new CalendarFragment());
+            } else if (id == R.id.microfono) {
+                replaceFragment(new MicFragment());
+            } else if (id == R.id.ajustes) {
+                replaceFragment(new SettingFragment());
+            }
+            return true;
+        });
+
+        binding.fab.setOnClickListener(v -> {
+            Toast.makeText(this, "FAB presionado", Toast.LENGTH_SHORT).show();
+
+
+        });
+
+
     }
+
+    private void replaceFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frame_layout, fragment);
+        transaction.commit();
+    }
+
+
 }
