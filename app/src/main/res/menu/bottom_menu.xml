@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/home"
+        android:title="Inicio"
+        android:icon="@drawable/ic_home"/>
+
+    <item
+        android:id="@+id/agenda"
+        android:title="Agenda"
+        android:icon="@drawable/ic_calendar"/>
+
+    <item
+        android:id="@+id/placeholder"
+        android:title=" "           android:icon="@null"        android:enabled="false"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/microfono"
+        android:title="Microfono"
+        android:icon="@drawable/ic_mic"/>
+
+    <item
+        android:id="@+id/ajustes"
+        android:title="Ajustes"
+        android:icon="@drawable/ic_settings"/>
+
+</menu>
