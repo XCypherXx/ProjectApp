@@ -14,13 +14,14 @@
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:paddingBottom="24dp">
 
         <TextView
             android:id="@+id/user_greeting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginStart="25dp"
             android:text=""
             android:textColor="@color/md_theme_onPrimaryContainer"
             android:textSize="32sp"
@@ -37,6 +38,8 @@
             android:contentDescription="Notificaciones"
             android:scaleType="centerInside"
             android:src="@drawable/ic_noti"
+            android:tint="@color/md_theme_onPrimaryContainer"
+            tools:ignore="UseAppTint"
             app:layout_constraintEnd_toStartOf="@+id/profile_image"
             app:layout_constraintTop_toTopOf="@+id/profile_image"
             app:layout_constraintBottom_toBottomOf="@+id/profile_image"
@@ -46,41 +49,69 @@
             android:id="@+id/profile_image"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_marginTop="-10dp"
-            android:layout_marginEnd="-10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
             android:padding="18dp"
+            android:tint="@color/md_theme_onPrimaryContainer"
+            tools:ignore="UseAppTint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/important_tasks_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:text="Tus categorias"
-            android:textColor="@color/md_theme_onSecondary"
-            android:textSize="18sp"
-            android:textStyle="bold"
+        <View
+            android:id="@+id/dark_background_rect"
+            android:layout_width="match_parent"
+            android:layout_height="700dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/rounded_top_dark_background"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_greeting" />
+            app:layout_constraintTop_toBottomOf="@id/user_greeting" />
+
+        <LinearLayout
+            android:id="@+id/category_layout_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="@id/dark_background_rect"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/important_tasks_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginTop="25dp"
+                android:text="Categorías"
+                android:textColor="@color/md_theme_onPrimaryContainer"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/user_greeting" />
+        </LinearLayout>
 
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/categoryRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="20dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:orientation="horizontal"
-            android:paddingStart="16dp"
+            android:paddingStart="18dp"
             android:paddingEnd="16dp"
             android:scrollbars="horizontal"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/important_tasks_label"
+            app:layout_constraintTop_toBottomOf="@id/category_layout_header"
             tools:listitem="@layout/category_item" />
 
 
@@ -88,10 +119,11 @@
             android:id="@+id/recent_updates_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="27dp"
             android:text="Tareas Importantes"
             android:textStyle="bold"
-            android:textColor="@color/md_theme_onSecondary"
+            android:textColor="@color/md_theme_onPrimaryContainer"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/categoryRecyclerView" />
@@ -100,10 +132,12 @@
             android:id="@+id/view_all_updates"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="45dp"
+            android:layout_marginEnd="20dp"
             android:text="Ver Todo"
-            android:textColor="@color/md_theme_onSecondary"
-            android:textSize="14sp"
+            android:textColor="@color/md_theme_onPrimaryContainer"
+            android:textSize="15sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/categoryRecyclerView" />
 
@@ -112,10 +146,13 @@
             android:id="@+id/important_task_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/md_theme_secondaryContainer"
-            app:cardCornerRadius="24dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            app:cardBackgroundColor="@color/md_theme_onSecondaryContainer"
+            app:cardCornerRadius="20dp"
             app:cardElevation="8dp"
+            app:strokeColor="@color/md_theme_onSecondaryContainer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recent_updates_label">
@@ -125,13 +162,15 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="24dp">
+                android:padding="22dp">
 
                 <ImageView
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_call" />
+                    android:tint="@color/md_theme_secondaryContainer"
+                    android:src="@drawable/ic_call"
+                    tools:ignore="UseAppTint" />
 
 
                 <TextView
@@ -139,8 +178,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Realizar una llamada"
-                    android:textColor="@color/md_theme_inverseSurface"
-                    android:textSize="18sp" />
+                    android:textColor="@color/md_theme_secondaryContainer"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
 
 
             </LinearLayout>
@@ -151,9 +191,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/md_theme_secondaryContainer"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            app:cardBackgroundColor="@color/md_theme_onSecondaryContainer"
             app:cardCornerRadius="24dp"
             app:cardElevation="8dp"
+            app:strokeColor="@color/md_theme_onSecondaryContainer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/important_task_card">
@@ -163,22 +206,25 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="24dp">
+                android:padding="22dp">
 
 
                 <ImageView
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_school" />
+                    android:tint="@color/md_theme_secondaryContainer"
+                    android:src="@drawable/ic_school"
+                    tools:ignore="UseAppTint" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Tarea Mobile App "
-                    android:textColor="@color/md_theme_inverseSurface"
-                    android:textSize="18sp" />
+                    android:textColor="@color/md_theme_secondaryContainer"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -187,6 +233,55 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/important_task_card3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            app:cardBackgroundColor="@color/md_theme_onSecondaryContainer"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp"
+            app:strokeColor="@color/md_theme_onSecondaryContainer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/important_task_card2">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="22dp">
+
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="16dp"
+                    android:tint="@color/md_theme_secondaryContainer"
+                    android:src="@drawable/ic_school"
+                    tools:ignore="UseAppTint" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tarea Mobile App "
+                    android:textColor="@color/md_theme_secondaryContainer"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.core.widget.NestedScrollView>
