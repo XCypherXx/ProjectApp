@@ -7,7 +7,7 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_primary_home"
+    android:background="@color/md_theme_primaryContainer"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -20,10 +20,10 @@
             android:id="@+id/user_greeting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="54dp"
+            android:layout_marginTop="7dp"
             android:text=""
-            android:textColor="@color/md_theme_onSecondary"
-            android:textSize="34sp"
+            android:textColor="@color/md_theme_onPrimaryContainer"
+            android:textSize="32sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -40,14 +40,14 @@
             app:layout_constraintEnd_toStartOf="@+id/profile_image"
             app:layout_constraintTop_toTopOf="@+id/profile_image"
             app:layout_constraintBottom_toBottomOf="@+id/profile_image"
-            android:layout_marginEnd="8dp"/> <!-- espacio entre la foto y el icono -->
+            android:layout_marginEnd="5dp"/> <!-- espacio entre la foto y el icono -->
 
         <ImageView
             android:id="@+id/profile_image"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:layout_marginTop="44dp"
-            android:layout_marginEnd="1dp"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="-10dp"
+            android:layout_marginEnd="-10dp"
             android:padding="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
