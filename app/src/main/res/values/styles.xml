@@ -31,8 +31,8 @@
     <style name="ShapeAppearanceOverlay.BottomAppBar.Rounded" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamilyTopLeft">rounded</item>
         <item name="cornerFamilyTopRight">rounded</item>
-        <item name="cornerSizeTopLeft">40dp</item>
-        <item name="cornerSizeTopRight">40dp</item>
+        <item name="cornerSizeTopLeft">50dp</item>
+        <item name="cornerSizeTopRight">50dp</item>
     </style>
 
     <style name="TopRoundedCard">
@@ -45,6 +45,12 @@
     <style name="ShapeAppearanceOverlay.App.FloatingActionButton" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="BottomNavStyle" parent="Widget.Material3.BottomNavigationView">
+        <!-- Reduce el padding interno de cada ítem -->
+        <item name="itemPaddingTop">24dp</item>
+        <item name="itemPaddingBottom">15dp</item>
     </style>
 
 
