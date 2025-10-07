@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_primaryContainer"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".AddFragment">
+
+    <View
+        android:id="@+id/top_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="112dp"
+        android:background="@drawable/rounded_top_dark_background" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <!-- 1. Botón de Retroceso (Izquierda) -->
+        <ImageButton
+            android:id="@+id/icon_menu"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/ic_menu"
+            android:tint="@color/md_theme_onPrimaryContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="UseAppTint" />
+
+        <!-- 2. Título Central ("Registrar actividad") -->
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Registrar actividad"
+            android:textColor="@color/md_theme_onPrimaryContainer"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/icon_menu"
+            app:layout_constraintEnd_toStartOf="@+id/profile_image"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="28dp"
+            />
+
+        <!-- 3. Imagen de Perfil (Derecha) -->
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="4dp"
+            android:padding="15dp"
+            android:tint="@color/md_theme_onPrimaryContainer"
+            tools:ignore="UseAppTint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="0dp"
+        android:layout_marginTop="115dp"> <!-- Ajusta el margen superior para que inicie debajo de la cabecera -->
+
+        <!-- CAMPO DE TÍTULO DE LA TAREA (Material Design con estilo transparente) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/title_input_layout"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            app:hintEnabled="false"
+            app:boxBackgroundMode="none" > <!-- Importante para eliminar el fondo de la caja -->
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Título de la actividad"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:maxLength="100"
+                android:maxLines="1"
+                android:inputType="textCapSentences"
+                android:background="@android:color/transparent"
+                android:textColor="@color/md_theme_secondaryContainer"
+                android:textColorHint="@color/md_theme_onPrimaryContainer"
+                android:paddingStart="40dp"
+                android:paddingEnd="0dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+            />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- LÍNEA SEPARADORA HORIZONTAL -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="0dp"
+            android:background="@color/md_theme_secondaryContainer" />
+
+        
+    </LinearLayout>
+
+
+
+
+
+</FrameLayout>
