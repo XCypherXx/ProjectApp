@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/md_theme_primaryContainer"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".AddFragment">
+    tools:context="">
 
     <View
         android:id="@+id/top_background"
