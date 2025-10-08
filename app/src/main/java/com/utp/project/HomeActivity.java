@@ -47,7 +47,6 @@ public class HomeActivity extends AppCompatActivity {
 
         // Pantalla inicial
         replaceFragment(new HomeFragment()); // fragment inicial
-        binding.bottomNavigationView.setBackground(null);
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();

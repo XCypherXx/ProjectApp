@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_primaryContainer"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    >
+
+    <View
+        android:id="@+id/top_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="112dp"
+        android:background="@drawable/rounded_top_dark_background" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <!-- 1. Botón de Retroceso (Izquierda) -->
+        <ImageButton
+            android:id="@+id/icon_menu"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/ic_menu"
+            android:tint="@color/md_theme_onPrimaryContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="UseAppTint" />
+
+        <!-- 2. Título Central ("Registrar actividad") -->
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Registrar actividad"
+            android:textColor="@color/md_theme_onPrimaryContainer"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/icon_menu"
+            app:layout_constraintEnd_toStartOf="@+id/profile_image"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="28dp"
+            />
+
+        <!-- 3. Imagen de Perfil (Derecha) -->
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="4dp"
+            android:padding="15dp"
+            android:tint="@color/md_theme_onPrimaryContainer"
+            tools:ignore="UseAppTint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="0dp"
+        android:layout_marginTop="115dp"> <!-- Ajusta el margen superior para que inicie debajo de la cabecera -->
+
+        <!-- CAMPO DE TÍTULO DE LA TAREA (Material Design con estilo transparente) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/title_input_layout"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            app:hintEnabled="false"
+            app:boxBackgroundMode="none" > <!-- Importante para eliminar el fondo de la caja -->
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Título de la actividad"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:maxLength="100"
+                android:maxLines="1"
+                android:inputType="textCapSentences"
+                android:background="@android:color/transparent"
+                android:textColor="@color/md_theme_secondaryContainer"
+                android:textColorHint="@color/md_theme_secondaryContainer"
+                android:paddingStart="40dp"
+                android:paddingEnd="0dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+            />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- LÍNEA SEPARADORA HORIZONTAL -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="0dp"
+            android:background="@color/md_theme_onSecondaryContainer" />
+
+        <LinearLayout
+            android:id="@+id/layout_all_day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_reloj"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                tools:ignore="UseAppTint" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="40dp"
+                android:text="Todo el día"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_all_day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="35dp"
+                android:checked="false"
+                android:scaleY="1.5"
+                android:scaleX="1.5" />
+        </LinearLayout>
+
+        <!-- SECCIÓN: Fecha (Día, Mes, Año) -->
+        <LinearLayout
+            android:id="@+id/layout_fecha1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="8dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <!-- Icono de Calendario (Usaremos ic_agenda si existe o ic_calendar) -->
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_calendar"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                tools:ignore="UseAppTint" />
+
+            <!-- Texto "Fecha" -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Jueves, Oct 2, 2025"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+
+            <!-- Valor de la Fecha (Ejemplo: 25 Diciembre, 2025) -->
+            <TextView
+                android:id="@+id/text_fecha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                android:text="09:00 PM"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer"
+                android:paddingHorizontal="8dp" />
+
+        </LinearLayout>
+        <!-- FIN: Sección Fecha -->
+
+        <!-- SECCIÓN: Hora (Hora de inicio/fin) -->
+        <LinearLayout
+            android:id="@+id/layout_fecha2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="8dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <!-- Icono de Reloj -->
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_calendar"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                tools:ignore="UseAppTint" />
+
+            <!-- Texto "Hora" -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Jueves, Oct 2, 2025"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+
+            <!-- Valor de la Hora (Ejemplo: 10:00 - 11:00) -->
+            <TextView
+                android:id="@+id/text_hora"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                android:text="10:00 PM"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer"
+                android:paddingHorizontal="8dp" />
+
+        </LinearLayout>
+        <!-- FIN: Sección Hora -->
+
+        <!-- LÍNEA SEPARADORA HORIZONTAL FINAL -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
+        <LinearLayout
+            android:id="@+id/layout_repetir"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_repetir"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                tools:ignore="UseAppTint" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="40dp"
+                android:text="No se repite"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
+        <LinearLayout
+            android:id="@+id/layout_agregarPersonas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_people"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                tools:ignore="UseAppTint" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="40dp"
+                android:text="Agregar personas"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
+        <LinearLayout
+            android:id="@+id/layout_ubicación"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_ubi"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="15dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="-4dp"
+                android:layout_marginEnd="40dp"
+                android:text="Agregar ubicación"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
+        <LinearLayout
+            android:id="@+id/layout_notificación"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:src="@drawable/ic_noti"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                tools:ignore="UseAppTint" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="40dp"
+                android:text="Agregar notificación"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
+        <LinearLayout
+            android:id="@+id/layout_color"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:src="@drawable/ic_color"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="40dp"
+                android:text="Elegir color"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="top"
+            android:paddingBottom="10dp">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_descri"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="10dp"
+                tools:ignore="UseAppTint" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/description_input_layout"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-2dp"
+                app:hintEnabled="false"
+                app:boxBackgroundMode="none" >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_text_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Agregar descripción"
+                    android:gravity="top|start"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:minLines="2"
+                    android:maxLines="8"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:background="@android:color/transparent"
+                    android:textColor="@color/md_theme_secondaryContainer"
+                    android:textColorHint="@color/md_theme_secondaryContainer"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_guardar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="25dp"
+            android:paddingHorizontal="25dp"
+            android:paddingVertical="12dp"
+            android:text="Guardar"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/md_theme_tertiaryContainer"
+            android:textColor="@color/md_theme_onTertiaryContainer"
+            app:cornerRadius="30dp" />
+
+    </LinearLayout>
+</FrameLayout>

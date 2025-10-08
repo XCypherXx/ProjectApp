@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_primary_home"
+    android:background="@color/black"
     tools:context=".MainActivity">
 
 
@@ -24,8 +24,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:menu="@menu/bottom_menu"
-        app:itemIconSize="28dp"
-        app:labelVisibilityMode="labeled" app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"/>
+        app:backgroundTint="@color/md_theme_primaryContainer"
+        app:itemIconTint="@color/md_theme_onPrimaryContainer"
+        app:itemTextColor="@color/md_theme_onPrimaryContainer"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.BottomAppBar.Rounded"
+        app:itemIconSize="25dp"
+        app:labelVisibilityMode="labeled"
+        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
+        style="@style/BottomNavStyle" />
     <!-- FAB -->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -33,12 +39,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="50dp"
         android:src="@drawable/ic_add"
-        app:maxImageSize="20dp"
-        app:tint="@color/white"
-        app:backgroundTint="?attr/colorPrimaryContainer"
-        app:fabCustomSize="56dp"  app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.FloatingActionButton"
+        app:maxImageSize="27dp"
+        app:tint="@color/md_theme_onPrimaryContainer"
+        app:backgroundTint="@color/md_theme_primaryContainer"
+        app:fabCustomSize="65dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.FloatingActionButton"
         />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
