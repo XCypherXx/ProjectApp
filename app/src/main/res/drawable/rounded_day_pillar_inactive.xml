@@ -2,5 +2,5 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <corners android:radius="12dp" />
-    <solid android:color="@color/md_theme_surface" /> <!-- Pilar de color claro/gris -->
+    <solid android:color="@color/md_theme_onSecondaryContainer" />
 </shape>

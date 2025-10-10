@@ -71,14 +71,14 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
         if (model.isSelected()) {
             // Estado SELECCIONADO: Fondo del pilar oscuro, Círculo de número activo
             holder.dayContainer.setBackgroundResource(R.drawable.rounded_day_pillar_selected);
-            holder.dayOfWeekText.setTextColor(ContextCompat.getColor(context, R.color.white));
-            holder.dayNumberText.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.dayOfWeekText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_secondaryContainer));
+            holder.dayNumberText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_onTertiaryContainer));
             holder.dayNumberText.setBackgroundResource(R.drawable.rounded_selection_circle_active);
         } else {
             // Estado INACTIVO: Fondo del pilar claro, Sin círculo, Texto negro
             holder.dayContainer.setBackgroundResource(R.drawable.rounded_day_pillar_inactive);
-            holder.dayOfWeekText.setTextColor(ContextCompat.getColor(context, R.color.black));
-            holder.dayNumberText.setTextColor(ContextCompat.getColor(context, R.color.black));
+            holder.dayOfWeekText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_secondaryContainer));
+            holder.dayNumberText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_tertiaryContainer));
             holder.dayNumberText.setBackgroundResource(0); // Sin fondo de círculo
         }
 
