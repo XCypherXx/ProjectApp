@@ -50,12 +50,13 @@ public class HomeActivity extends AppCompatActivity {
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+            //java homefagment
             if (id == R.id.home) {
                 replaceFragment(new HomeFragment());
             } else if (id == R.id.agenda) {
                 replaceFragment(new CalendarFragment());
-            } else if (id == R.id.microfono) {
-                replaceFragment(new MicFragment());
+            } else if (id == R.id.agregar) {
+                replaceFragment(new AddFragment());
             } else if (id == R.id.ajustes) {
                 replaceFragment(new SettingFragment());
             }

@@ -17,9 +17,9 @@
         android:visible="true"/>
 
     <item
-        android:id="@+id/microfono"
-        android:title="Microfono"
-        android:icon="@drawable/ic_mic"/>
+        android:id="@+id/agregar"
+        android:title="Agregar"
+        android:icon="@drawable/ic_add"/>
 
     <item
         android:id="@+id/ajustes"

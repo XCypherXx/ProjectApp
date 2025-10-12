@@ -53,5 +53,41 @@
         <item name="itemPaddingBottom">15dp</item>
     </style>
 
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?attr/colorOutlineVariant</item>
+        <item name="android:layout_marginHorizontal">16dp</item>
+    </style>
+
+
+    <!-- Estilo base para el contenedor de cada item de la lista de ajustes -->
+    <style name="SettingsItemContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">12dp</item>
+        <!-- Efecto Ripple para indicar que es clickeable -->
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <!-- Estilo para el texto principal del item de ajuste -->
+    <style name="SettingsItemText">
+        <item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:layout_marginStart">16dp</item>
+    </style>
+
+    <!-- Estilo para el texto de valor (ej. 'English', 'Light') -->
+    <style name="SettingsItemValueText">
+        <item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+
 
 </resources>
