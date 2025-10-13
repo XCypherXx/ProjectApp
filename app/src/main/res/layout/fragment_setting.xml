@@ -1,18 +1,342 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Layout para la pantalla de Configuración.
+    Utiliza NestedScrollView para permitir el desplazamiento y un LinearLayout
+    principal para organizar los elementos verticalmente.
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_primary_home"
+    android:background="?attr/colorSurface"
     tools:context=".SettingFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <!-- Barra de herramientas de md3 -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/settings_title"
+            app:navigationIcon="@drawable/ic_back"
+            style="@style/Widget.Material3.Toolbar.Surface"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Settings"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:textColor="@color/white"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-</FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
+
+            <!-- ************************* -->
+            <!-- 1. Sección de Perfil -->
+            <!-- ************************* -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="24dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <!-- Imagen de Perfil -->
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/profile_image"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_user_default"
+                        android:background="?attr/colorSurfaceContainer"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                        android:scaleType="centerCrop"/>
+
+                    <!-- Nombre y Correo -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/profile_image"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:id="@+id/user_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="user"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface"/>
+
+                        <TextView
+                            android:id="@+id/user_email"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="usuario@mail.com"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant"/>
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!-- Botón de Editar Perfil -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_edit_profile"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Editar Perfil"
+                    android:textColor="?attr/colorPrimary"
+                    app:cornerRadius="8dp"/>
+
+            </LinearLayout>
+
+            <!-- ************************* -->
+            <!-- 2. Sección de Preferencias -->
+            <!-- ************************* -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingHorizontal="16dp"
+                android:text="Preferencias"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorPrimary"/>
+
+            <!-- Item: Notificaciones y sonidos (con Switch) -->
+            <LinearLayout
+                android:id="@+id/item_notifications"
+                style="@style/SettingsItemContainer"
+                android:layout_marginTop="8dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_notif"
+                    android:contentDescription="Icono de Notificaciones"
+                    app:tint="?attr/colorOnSurfaceVariant"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Notificaciones y sonidos"
+                    style="@style/SettingsItemText"/>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switch_notifications"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"/>
+            </LinearLayout>
+
+            <!-- Item: Idioma -->
+            <LinearLayout
+                android:id="@+id/item_language"
+                style="@style/SettingsItemContainer">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_language"
+                    android:contentDescription="Icono de Idioma"
+                    app:tint="?attr/colorOnSurfaceVariant"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lenguaje"
+                    style="@style/SettingsItemText"/>
+
+                <TextView
+                    android:id="@+id/text_language_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Español"
+                    style="@style/SettingsItemValueText"/>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_forward"
+                    android:contentDescription="Flecha"
+                    app:tint="?attr/colorOutline"/>
+            </LinearLayout>
+
+            <!-- Item: Tema -->
+            <LinearLayout
+                android:id="@+id/item_theme"
+                style="@style/SettingsItemContainer">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_theme"
+                    android:contentDescription="Icono de Tema"
+                    app:tint="?attr/colorOnSurfaceVariant"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tema"
+                    style="@style/SettingsItemText"/>
+
+                <TextView
+                    android:id="@+id/text_theme_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Light"
+                    style="@style/SettingsItemValueText"/>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_forward"
+                    android:contentDescription="Flecha"
+                    app:tint="?attr/colorOutline"/>
+            </LinearLayout>
+
+            <!-- ************************* -->
+            <!-- 3. Sección de Cuenta -->
+            <!-- ************************* -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:paddingHorizontal="16dp"
+                android:text="Cuenta"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorPrimary"/>
+
+            <!-- NOTA: Se omiten Password y Login with Face ID según solicitud -->
+
+            <!-- Item: Soporte -->
+            <LinearLayout
+                android:id="@+id/item_support"
+                style="@style/SettingsItemContainer"
+                android:layout_marginTop="8dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_support"
+                    android:contentDescription="Icono de Soporte"
+                    app:tint="?attr/colorOnSurfaceVariant"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Soporte"
+                    style="@style/SettingsItemText"/>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_forward"
+                    android:contentDescription="Flecha"
+                    app:tint="?attr/colorOutline"/>
+            </LinearLayout>
+
+            <!-- Item: Limpiar caché -->
+            <LinearLayout
+                android:id="@+id/item_clear_cache"
+                style="@style/SettingsItemContainer">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_clear"
+                    android:contentDescription="Icono de Limpiar caché"
+                    app:tint="?attr/colorOnSurfaceVariant"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Limpiar cache"
+                    style="@style/SettingsItemText"/>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_forward"
+                    android:contentDescription="Flecha"
+                    app:tint="?attr/colorOutline"/>
+            </LinearLayout>
+
+            <!-- Item: Términos y Política de Privacidad -->
+            <LinearLayout
+                android:id="@+id/item_terms_privacy"
+                style="@style/SettingsItemContainer">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_terms"
+                    android:contentDescription="Icono de Política"
+                    app:tint="?attr/colorOnSurfaceVariant"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Términos y Política de Privacidad"
+                    style="@style/SettingsItemText"/>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_forward"
+                    android:contentDescription="Flecha"
+                    app:tint="?attr/colorOutline"/>
+            </LinearLayout>
+
+            <!-- Item: Cerrar Sesión (Logout) -->
+            <LinearLayout
+                android:id="@+id/item_logout"
+                style="@style/SettingsItemContainer">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_logout"
+                    android:contentDescription="Icono de Cerrar Sesión"
+                    app:tint="?attr/colorError"/> <!-- Usar color de error para el ícono de logout -->
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cerrar Sesión"
+                    style="@style/SettingsItemText"
+                    android:textColor="?attr/colorError"/> <!-- Usar color de error para el texto de logout -->
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_forward"
+                    android:contentDescription="Flecha"
+                    app:tint="?attr/colorOutline"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
