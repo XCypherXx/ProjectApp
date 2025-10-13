@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.utp.project.adapters.CalendarAdapter;
+import com.utp.project.adapters.PlanAdapter;
 import com.utp.project.models.CalendarDayModel;
+import com.utp.project.models.PlanModel;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,6 +43,10 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
         calendarRecyclerView = view.findViewById(R.id.recycler_calendar);
 
         initializeCalendar();
+
+        setupProximosPlanes(view); // <-- LLAMADA PARA INICIALIZAR LA LISTA DE PLANES
+
+        setupPlanesTerminados(view); // <-- LLAMADA PARA INICIALIZAR LA LISTA DE PLANES TERMINADOS
 
         return view;
     }
@@ -169,9 +175,58 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
     public void onDateSelected(LocalDate date) {
         // Muestra un mensaje temporal con la fecha seleccionada
         Toast.makeText(getContext(), "Cargando actividades para: " + date, Toast.LENGTH_SHORT).show();
+    }
 
-        // TODO: Lógica principal de tu aplicación.
-        // 1. Usa esta 'date' para filtrar y cargar los eventos/actividades en la lista inferior.
-        // 2. Opcionalmente, actualiza el TextView de tu encabezado con el Mes/Año completo.
+    private void setupProximosPlanes(View view) {
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_proximos_planes);
+
+        // 1. Crear la lista de datos de ejemplo (¡Asegúrate de definir estos colores en R.color!)
+        List<PlanModel> planes = new ArrayList<>();
+
+        // Nota: Reemplaza R.color.yellow_bar y R.color.yellow_background_alpha con tus colores reales
+        // que imiten el #FFE100 y el #60FFE100 de tu XML.
+
+        // Ejemplo Plan 1 (Amarillo)
+        planes.add(new PlanModel(
+                "Preparar mi cena",
+                "11:45 PM - 12:00 AM",
+                R.color.yellow_bar, // Color sólido para la barra lateral
+                R.color.yellow_background_alpha // Color semitransparente para el fondo
+        ));
+
+        // Ejemplo Plan 2 (Amarillo)
+        planes.add(new PlanModel(
+                "Dormir",
+                "12:00 AM - 06:00 AM",
+                R.color.yellow_bar,
+                R.color.yellow_background_alpha
+        ));
+
+        // 2. Configurar el LayoutManager (vertical) y el Adaptador
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        PlanAdapter adapter = new PlanAdapter(getContext(), planes);
+        recyclerView.setAdapter(adapter);
+    }
+    private void setupPlanesTerminados(View view) {
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_planes_terminados);
+
+        // 1. Crear la lista de datos de ejemplo
+        List<PlanModel> planesTerminados = new ArrayList<>();
+
+        // ¡Asegúrate de definir R.color.red_bar y R.color.red_background_alpha en R.color!
+
+        // Ejemplo Plan 1 (Rojo)
+        planesTerminados.add(new PlanModel(
+                "Preparar mi cena",
+                "11:45 PM - 12:00 AM",
+                R.color.red_bar, // Color sólido para la barra lateral (rojo #FF0000)
+                R.color.red_background_alpha // Color semitransparente para el fondo (rojo #60FF0000)
+        ));
+
+        // 2. Configurar el LayoutManager y el Adaptador
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // ¡REUTILIZAMOS EL MISMO ADAPTADOR!
+        PlanAdapter adapter = new PlanAdapter(getContext(), planesTerminados);
+        recyclerView.setAdapter(adapter);
     }
 }

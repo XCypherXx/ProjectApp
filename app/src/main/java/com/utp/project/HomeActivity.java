@@ -1,26 +1,43 @@
 package com.utp.project;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
+import android.os.Vibrator;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.utp.project.databinding.ActivityHomeBinding;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements SensorEventListener {
     // private RecyclerView categoryRecyclerView;
 
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fab;
     private ActivityHomeBinding binding;
+
+    // --- Lógica del Sensor de Agitación ---
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private long lastUpdate = 0;
+    private float last_x, last_y, last_z;
+    // El umbral de 800 es un valor de ejemplo. Puedes ajustarlo para más o menos sensibilidad.
+    private static final int SHAKE_THRESHOLD = 800;
+    private static final int PERMISSION_REQUEST_CODE = 1001;
+    // --- Fin Lógica del Sensor de Agitación ---
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +46,12 @@ public class HomeActivity extends AppCompatActivity {
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-// Configuración de accesibilidad para FAB
+        // Configuración de accesibilidad para FAB
         binding.fab.setFocusable(true);
         binding.fab.setClickable(true);
         binding.fab.setContentDescription(getString(R.string.fab_add_task_description));
 
-// Listener del FABB
+        // Listener del FABB
         binding.fab.setOnClickListener(v -> {
             Toast.makeText(this, "FAB presionado", Toast.LENGTH_SHORT).show();
             // Aquí puedes abrir un fragment o lanzar una Activity
@@ -69,7 +86,11 @@ public class HomeActivity extends AppCompatActivity {
 
         });
 
-
+        // Inicialización del Sensor
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager != null) {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        }
     }
 
     private void replaceFragment(Fragment fragment) {
@@ -79,5 +100,117 @@ public class HomeActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+    // Lógica del Sensor de Agitación (SensorEventListener)
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Iniciar la escucha del sensor cuando la actividad esté activa
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Detener la escucha del sensor para ahorrar batería
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            long curTime = System.currentTimeMillis();
+
+            // Verificación cada 100ms para evitar spam de eventos
+            if ((curTime - lastUpdate) > 100) {
+                long diffTime = (curTime - lastUpdate);
+                lastUpdate = curTime;
+
+                float x = event.values[0];
+                float y = event.values[1];
+                float z = event.values[2];
+
+                // Cálculo de la magnitud de la agitación
+                float speed = Math.abs(x + y + z - last_x - last_y - last_z) / diffTime * 10000;
+
+                if (speed > SHAKE_THRESHOLD) {
+                    // ¡Agitación detectada!
+                    handleShakeDetection();
+                }
+
+                last_x = x;
+                last_y = y;
+                last_z = z;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // No se requiere implementación para este caso.
+    }
+
+    // Manejo de Agitación y Activación del Micrófono
+
+    private void handleShakeDetection() {
+        // 1. Deshabilitar el sensor temporalmente para evitar que se dispare varias veces
+        sensorManager.unregisterListener(this);
+
+        // 2. Dar feedback de vibración al usuario
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (v != null) {
+            v.vibrate(100);
+        }
+
+        // 3. Verificar y solicitar permiso de micrófono
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Solicitar permiso
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_REQUEST_CODE);
+        } else {
+            // Permiso concedido, activar la interfaz de micrófono
+            activateMicrophone();
+        }
+    }
+
+    private void activateMicrophone() {
+        Toast.makeText(this, "Micrófono Activado por Agitación", Toast.LENGTH_SHORT).show();
+
+        // Cargar el fragmento del micrófono.
+        // ¡Esto cumple con la parte de "se active el microfono automaticamente y se visualice"!
+        replaceFragment(new MicFragment());
+
+        // Opcional: Resaltar el ícono del micrófono en el BottomNav
+        binding.bottomNavigationView.setSelectedItemId(R.id.microfono);
+
+        // Importante: Volver a registrar el sensor después de un breve retraso
+        // (Podrías usar un Handler, pero para mantenerlo simple, lo haremos en onRequestPermissionsResult)
+    }
+
+    // Manejo del Resultado de la Solicitud de Permisos
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permiso otorgado, activar la funcionalidad
+                activateMicrophone();
+            } else {
+                // Permiso denegado
+                Toast.makeText(this, "Permiso de micrófono denegado.", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        // Volver a registrar el sensor (lo hacemos aquí para asegurar que se reactive después del permiso)
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        }
+    }
 }

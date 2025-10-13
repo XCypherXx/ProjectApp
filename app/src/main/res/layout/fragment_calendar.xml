@@ -155,7 +155,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Plan en curso"
-                    android:textColor="@color/md_theme_onPrimaryContainer"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -165,26 +165,30 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="11:30 PM"
-                    android:textColor="@color/md_theme_onPrimaryContainer"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp" />
 
-                <ProgressBar
+                <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/progress_current_plan"
-                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                     android:layout_width="100dp"
-                    android:layout_height="10dp"
+                    android:layout_height="wrap_content"
                     android:progress="70"
-                    android:progressTint="@color/teal_200"
-                    android:backgroundTint="@color/md_theme_secondaryContainer"
-                    android:layout_marginBottom="8dp" />
+                    android:max="100"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="4dp"
+                    app:trackCornerRadius="10dp"
+                    app:trackColor="@color/md_theme_secondaryContainer"
+                    app:indicatorColor="@color/teal_200"
+                    app:trackThickness="10dp"
+                    />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="-75dp"
+                    android:layout_marginTop="-80dp"
                     android:layout_marginStart="120dp">
 
                     <TextView
@@ -192,7 +196,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Siguiente actividad: Pasear perro"
-                        android:textColor="@color/md_theme_onPrimaryContainer"
+                        android:textColor="@color/white"
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="4dp" />
@@ -202,7 +206,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Tienes que llevar al parque del mercado al costado y encontrarte con .........."
-                        android:textColor="@color/md_theme_onPrimaryContainer"
+                        android:textColor="@color/white"
+                        android:layout_marginTop="5dp"
                         android:textSize="15sp"
                         android:maxLines="4"
                         android:ellipsize="end" />
@@ -229,7 +234,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Próximo plan (2)"
-                        android:textColor="@color/md_theme_onPrimaryContainer"
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp"
@@ -241,8 +246,7 @@
                         android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="false"
                         tools:itemCount="2"
-                        tools:listitem="@layout/item_plan_proximo"
-                        android:layout_marginBottom="24dp" />
+                        tools:listitem="@layout/item_plan_proximo" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -265,7 +269,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Planes terminados"
-            android:textColor="@color/md_theme_onPrimaryContainer"
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"

@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
-        android:textColor="@color/black"
+        android:textColor="@color/md_theme_secondaryContainer"
         android:textStyle="bold"
         tools:text="LUN" />
 
@@ -30,6 +30,7 @@
         android:gravity="center"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="@color/md_theme_onTertiaryContainer"
         android:layout_marginTop="4dp"
         tools:text="24"
         tools:background="@drawable/rounded_selection_circle_active"
