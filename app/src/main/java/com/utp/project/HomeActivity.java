@@ -183,10 +183,10 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
 
         // Cargar el fragmento del micrófono.
         // ¡Esto cumple con la parte de "se active el microfono automaticamente y se visualice"!
-        replaceFragment(new MicFragment());
+      /////////  replaceFragment(new MicFragment());
 
         // Opcional: Resaltar el ícono del micrófono en el BottomNav
-        binding.bottomNavigationView.setSelectedItemId(R.id.microfono);
+     ///////   binding.bottomNavigationView.setSelectedItemId(R.id.microfono);
 
         // Importante: Volver a registrar el sensor después de un breve retraso
         // (Podrías usar un Handler, pero para mantenerlo simple, lo haremos en onRequestPermissionsResult)
