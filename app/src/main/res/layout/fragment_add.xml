@@ -170,7 +170,7 @@
             android:clickable="true"
             android:focusable="true">
 
-            <!-- Icono de Calendario (Usaremos ic_agenda si existe o ic_calendar) -->
+            <!-- Icono de Calendario  -->
             <ImageView
                 android:layout_width="28dp"
                 android:layout_height="28dp"
@@ -182,6 +182,7 @@
 
             <!-- Texto "Fecha" -->
             <TextView
+                android:id="@+id/text_fecha"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -190,9 +191,9 @@
                 android:textStyle="bold"
                 android:textColor="@color/md_theme_secondaryContainer" />
 
-            <!-- Valor de la Fecha (Ejemplo: 25 Diciembre, 2025) -->
+            <!-- Valor de hora -->
             <TextView
-                android:id="@+id/text_fecha"
+                android:id="@+id/text_hora"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
@@ -217,7 +218,7 @@
             android:clickable="true"
             android:focusable="true">
 
-            <!-- Icono de Reloj -->
+            <!-- Icono de Calendario -->
             <ImageView
                 android:layout_width="28dp"
                 android:layout_height="28dp"
@@ -227,8 +228,9 @@
                 android:layout_marginEnd="15dp"
                 tools:ignore="UseAppTint" />
 
-            <!-- Texto "Hora" -->
+            <!-- Texto Fecha2-->
             <TextView
+                android:id="@+id/text_fecha2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -237,9 +239,9 @@
                 android:textStyle="bold"
                 android:textColor="@color/md_theme_secondaryContainer" />
 
-            <!-- Valor de la Hora (Ejemplo: 10:00 - 11:00) -->
+            <!-- Hora2 -->
             <TextView
-                android:id="@+id/text_hora"
+                android:id="@+id/text_hora2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
