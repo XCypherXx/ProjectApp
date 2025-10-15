@@ -40,7 +40,7 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
     // El umbral de 800 es un valor de ejemplo. Puedes ajustarlo para más o menos sensibilidad.
-    private static final int SHAKE_THRESHOLD = 800;
+    private static final int SHAKE_THRESHOLD = 2000;
     private static final int PERMISSION_REQUEST_CODE = 1001;
     // --- Fin Lógica del Sensor de Agitación ---
 

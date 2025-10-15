@@ -55,6 +55,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
     // Add the dependency for the Firebase Authentication library
     implementation("com.google.firebase:firebase-auth")
+    //Firebase Firestore
+    implementation ('com.google.firebase:firebase-firestore')
 
 
     implementation("com.google.android.gms:play-services-auth:21.4.0")

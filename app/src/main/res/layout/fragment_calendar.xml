@@ -77,7 +77,7 @@
         android:paddingHorizontal="15dp">
 
         <TextView
-            android:id="@+id/text_current_month_year"
+            android:id="@+id/text_fecha_today"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Junio 16, 2025"

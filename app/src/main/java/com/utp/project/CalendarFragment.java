@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,7 +20,10 @@ import com.utp.project.models.PlanModel;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class CalendarFragment extends Fragment implements CalendarAdapter.OnDateSelectedListener {
 
@@ -34,11 +38,17 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
     // Bandera para evitar llamadas duplicadas de carga durante el scroll
     private boolean isLoading = false;
 
+    private TextView textFechaToday;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Asegúrate de que R.layout.fragment_calendar contenga el RecyclerView con id: recycler_calendar
         View view = inflater.inflate(R.layout.fragment_calendar, container, false);
+
+        // 1. Inicializar y asignar la fecha de hoy
+        textFechaToday = view.findViewById(R.id.text_fecha_today);
+        setCurrentDate(); // Llama al nuevo metodo para poner la fecha
 
         calendarRecyclerView = view.findViewById(R.id.recycler_calendar);
 
@@ -49,6 +59,24 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
         setupPlanesTerminados(view); // <-- LLAMADA PARA INICIALIZAR LA LISTA DE PLANES TERMINADOS
 
         return view;
+    }
+
+    private void setCurrentDate() {
+        // Obtenemos una instancia de Calendar para la fecha actual
+        Calendar calendar = Calendar.getInstance();
+
+        // Define el formato de fecha en español (ej: "Miércoles, 15 de Octubre")
+        // Se usa 'Locale("es", "ES")' para asegurar el idioma
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d 'de' MMMM", new Locale("es", "ES"));
+
+        // Formatea la fecha
+        String formattedDate = sdf.format(calendar.getTime());
+
+        // Aseguramos que la primera letra sea mayúscula para buena presentación
+        formattedDate = formattedDate.substring(0, 1).toUpperCase() + formattedDate.substring(1);
+
+        // Asigna el texto al TextView
+        textFechaToday.setText(formattedDate);
     }
 
     private void initializeCalendar() {
