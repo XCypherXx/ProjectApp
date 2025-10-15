@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,17 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+// Nuevas importaciones necesarias para Ubicación (Asegúrate de tener el SDK de Places)
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import java.util.Arrays;
+import java.util.List;
+import android.app.Activity; // Importación necesaria para Activity.RESULT_OK
+import com.google.android.gms.common.api.Status;
+
 public class AddFragment extends Fragment {
 
     private TextView textStartDate;
@@ -30,12 +42,30 @@ public class AddFragment extends Fragment {
     // Vistas de Notificación (NUEVAS)
     private LinearLayout layoutNotificacion;
     private TextView textNotificacion;
+    // NUEVAS VISTAS DE UBICACIÓN
+    private LinearLayout layoutUbicacion;
+    private TextView textUbi;
     private Calendar startCalendar;
     private Calendar endCalendar;
     private long timeDeltaMillis = 3600000; // 1 hora por defecto (3600 * 1000)
     private int notificationMinutesBefore = 15; // 15 minutos por defecto
 
+    // NUEVAS VARIABLES PARA ALMACENAR LA UBICACIÓN SELECCIONADA
+    private String selectedLocationAddress = null;
+    private double latitude = 0.0;
+    private double longitude = 0.0;
+
+    // LANZADOR DE ACTIVIDAD PARA PLACE AUTOCOMPLETE (CLAVE)
+    private ActivityResultLauncher<Intent> startAutocomplete;
+
     public AddFragment() {
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Inicializar el lanzador de resultados de actividad
+        initializeLocationLauncher();
     }
 
     @Override
@@ -55,12 +85,21 @@ public class AddFragment extends Fragment {
         // Asegúrate de que este ID (text_notificacion) exista en fragment_add.xml
         textNotificacion = view.findViewById(R.id.text_notificacion);
 
+        // 1.c. Inicialización de Vistas (UBICACIÓN - NUEVO)
+        layoutUbicacion = view.findViewById(R.id.layout_ubicación);
+        textUbi = view.findViewById(R.id.text_ubi);
+
         startCalendar = Calendar.getInstance();
         endCalendar = (Calendar) startCalendar.clone(); // Iniciar con la misma fecha/hora
 
         // 2. Establecer valores por defecto (Hora de fin +1 hora por defecto)
         applyTimeDelta();
         updateNotificationText(); // Mostrar el valor inicial de la notificación
+
+        // Si hay una ubicación guardada, la mostramos (opcional, para re-edición)
+        if (selectedLocationAddress != null) {
+            updateLocationText(selectedLocationAddress, latitude, longitude);
+        }
 
         // 3. Establecer Listeners
         textStartDate.setOnClickListener(v -> showStartDatePickerDialog());
@@ -70,6 +109,9 @@ public class AddFragment extends Fragment {
 
         // Listener para Notificación (NUEVO)
         layoutNotificacion.setOnClickListener(v -> showNotificationOptionsDialog());
+
+        // Listener para Ubicación (NUEVO)
+        layoutUbicacion.setOnClickListener(v -> launchPlacePicker());
 
         // Listener para botón de retroceso (si existe)
         view.findViewById(R.id.icon_menu).setOnClickListener(v -> {
@@ -391,5 +433,111 @@ public class AddFragment extends Fragment {
         }
 
         textNotificacion.setText(text);
+    }
+
+    // LÓGICA DE UBICACIÓN (CORREGIDA)
+
+    /**
+     * Inicializa el lanzador que manejará el resultado de la selección de ubicación.
+     */
+    private void initializeLocationLauncher() {
+        startAutocomplete = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // 1. RESULTADO EXITOSO
+                        Intent data = result.getData();
+                        if (data != null) {
+                            Place place = Autocomplete.getPlaceFromIntent(data);
+                            handleSelectedPlace(place);
+                        }
+                    } else if (result.getResultCode() == Activity.RESULT_CANCELED) {
+                        // 2. USUARIO CANCELÓ LA BÚSQUEDA
+                        Toast.makeText(requireContext(),
+                                "Búsqueda de ubicación cancelada.",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        // 3. ERROR (CUALQUIER OTRO CÓDIGO)
+                        Intent data = result.getData();
+                        // Usamos Autocomplete.getStatusFromIntent(data) para errores
+                        Status status = Autocomplete.getStatusFromIntent(data);
+
+                        // Asegúrate de que el mensaje de error no sea nulo antes de mostrarlo
+                        String errorMessage = status != null && status.getStatusMessage() != null
+                                ? status.getStatusMessage()
+                                : "Error desconocido al seleccionar ubicación.";
+
+                        Toast.makeText(requireContext(),
+                                "Error de Ubicación: " + errorMessage,
+                                Toast.LENGTH_LONG).show();
+
+                    }
+                }
+        );
+    }
+
+    /**
+     * Lanza la actividad de Place Autocomplete.
+     */
+    private void launchPlacePicker() {
+        try {
+            // Campos de datos que deseamos obtener. LatLng y ADDRESS son obligatorios.
+            List<Place.Field> fields = Arrays.asList(
+                    Place.Field.NAME,
+                    Place.Field.LAT_LNG,
+                    Place.Field.ADDRESS
+            );
+
+            // Construir la Intent de Autocomplete en modo de pantalla completa.
+            Intent intent = new Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.FULLSCREEN,
+                    fields)
+                    .build(requireContext());
+
+            // Lanzar la actividad usando el lanzador.
+            startAutocomplete.launch(intent);
+
+        } catch (Exception e) {
+            Toast.makeText(requireContext(),
+                    "Error: ¿Places SDK y Clave API configurados correctamente?",
+                    Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Procesa la ubicación seleccionada y actualiza la UI.
+     */
+    private void handleSelectedPlace(Place place) {
+        if (place.getLatLng() == null) return; // Evita NullPointerException si falta LatLng
+
+        // Almacenar los datos para guardarlos con el plan
+        selectedLocationAddress = place.getAddress();
+        latitude = place.getLatLng().latitude;
+        longitude = place.getLatLng().longitude;
+
+        Toast.makeText(requireContext(),
+                "Ubicación seleccionada: " + (place.getName() != null ? place.getName() : "Dirección"),
+                Toast.LENGTH_SHORT).show();
+
+        updateLocationText(place.getName(), latitude, longitude);
+    }
+
+    /**
+     * Formatea el texto de la ubicación y lo muestra en el TextView.
+     */
+    private void updateLocationText(String locationName, double lat, double lon) {
+        String displayTitle = locationName != null && !locationName.isEmpty() ? locationName : selectedLocationAddress;
+
+        // Formato que muestra el nombre/dirección y las coordenadas (simplificado)
+        String displayText = String.format(Locale.getDefault(),
+                "%s\n(Lat: %.4f, Lon: %.4f)",
+                displayTitle,
+                lat,
+                lon);
+
+        textUbi.setText(displayText);
+        // Asumo que tienes este color definido
+        textUbi.setTextColor(requireContext().getResources().getColor(R.color.md_theme_onPrimaryContainer));
     }
 }

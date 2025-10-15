@@ -22,12 +22,17 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.utp.project.databinding.ActivityHomeBinding;
 
+//Importacion para Place SDK
+import com.google.android.libraries.places.api.Places;
+
 public class HomeActivity extends AppCompatActivity implements SensorEventListener {
     // private RecyclerView categoryRecyclerView;
 
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fab;
     private ActivityHomeBinding binding;
+
+    private static final String GOOGLE_API_KEY="AIzaSyA0LzOGh05nahYKpb3q0gsYxhdryuyMhBc";
 
     // --- Lógica del Sensor de Agitación ---
     private SensorManager sensorManager;
@@ -46,6 +51,15 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Solo inicializa si no ha sido inicializado antes
+        if (!Places.isInitialized() && !GOOGLE_API_KEY.isEmpty()) {
+            // Usa el contexto de la aplicación y la clave API
+            Places.initialize(getApplicationContext(), GOOGLE_API_KEY);
+        } else if (GOOGLE_API_KEY.isEmpty()){
+            Toast.makeText(this, "ERROR: La clave API de Google no está configurada en HomeActivity.", Toast.LENGTH_LONG).show();
+        }
+
         // Configuración de accesibilidad para FAB
         binding.fab.setFocusable(true);
         binding.fab.setClickable(true);

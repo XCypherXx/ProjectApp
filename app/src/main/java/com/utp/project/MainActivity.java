@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
         // Referencia a la primera TextView (nameCreater1)
         TextView nameCreater1 = findViewById(R.id.nameCreater1);
 
