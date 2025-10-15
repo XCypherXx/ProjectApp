@@ -1,11 +1,14 @@
 package com.utp.project;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +20,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 // Nuevas importaciones necesarias para Ubicación (Asegúrate de tener el SDK de Places)
@@ -28,10 +35,9 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import java.util.Arrays;
-import java.util.List;
-import android.app.Activity; // Importación necesaria para Activity.RESULT_OK
 import com.google.android.gms.common.api.Status;
+import android.content.pm.PackageManager;
+import android.Manifest; // Necesario para el permiso de contactos
 
 public class AddFragment extends Fragment {
 
@@ -45,6 +51,11 @@ public class AddFragment extends Fragment {
     // NUEVAS VISTAS DE UBICACIÓN
     private LinearLayout layoutUbicacion;
     private TextView textUbi;
+
+    // VISTAS DE CONTACTOS
+    private LinearLayout layoutAgregarPersonas;
+    private TextView textPersonasSeleccionadas; // Muestra los nombres de los contactos
+
     private Calendar startCalendar;
     private Calendar endCalendar;
     private long timeDeltaMillis = 3600000; // 1 hora por defecto (3600 * 1000)
@@ -54,9 +65,13 @@ public class AddFragment extends Fragment {
     private String selectedLocationAddress = null;
     private double latitude = 0.0;
     private double longitude = 0.0;
+    // Variable para almacenar los contactos seleccionados
+    private final List<String> selectedContacts = new ArrayList<>();
 
     // LANZADOR DE ACTIVIDAD PARA PLACE AUTOCOMPLETE (CLAVE)
     private ActivityResultLauncher<Intent> startAutocomplete;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+    private ActivityResultLauncher<Intent> selectContactLauncher;
 
     public AddFragment() {
     }
@@ -66,6 +81,7 @@ public class AddFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // Inicializar el lanzador de resultados de actividad
         initializeLocationLauncher();
+        initializeContactLaunchers();
     }
 
     @Override
@@ -88,6 +104,10 @@ public class AddFragment extends Fragment {
         // 1.c. Inicialización de Vistas (UBICACIÓN - NUEVO)
         layoutUbicacion = view.findViewById(R.id.layout_ubicación);
         textUbi = view.findViewById(R.id.text_ubi);
+
+        // VISTAS DE CONTACTOS (IDs del XML)
+        layoutAgregarPersonas = view.findViewById(R.id.layout_agregarPersonas);
+        textPersonasSeleccionadas = view.findViewById(R.id.text_personas_seleccionadas);
 
         startCalendar = Calendar.getInstance();
         endCalendar = (Calendar) startCalendar.clone(); // Iniciar con la misma fecha/hora
@@ -112,6 +132,9 @@ public class AddFragment extends Fragment {
 
         // Listener para Ubicación (NUEVO)
         layoutUbicacion.setOnClickListener(v -> launchPlacePicker());
+
+        // NUEVO: Listener para Agregar Personas
+        layoutAgregarPersonas.setOnClickListener(v -> checkContactPermissionAndLaunchPicker());
 
         // Listener para botón de retroceso (si existe)
         view.findViewById(R.id.icon_menu).setOnClickListener(v -> {
@@ -539,5 +562,123 @@ public class AddFragment extends Fragment {
         textUbi.setText(displayText);
         // Asumo que tienes este color definido
         textUbi.setTextColor(requireContext().getResources().getColor(R.color.md_theme_onPrimaryContainer));
+    }
+
+    // LÓGICA DE CONTACTOS
+
+    /**
+     * Inicializa los lanzadores para permisos y selección de contactos.
+     */
+    private void initializeContactLaunchers() {
+        // 1. Lanzador para solicitar el permiso READ_CONTACTS
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        // Permiso concedido, lanzar el selector de contactos
+                        launchContactPicker();
+                    } else {
+                        // Permiso denegado
+                        Toast.makeText(requireContext(),
+                                "Necesitas el permiso de contactos para invitar personas.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+
+        // 2. Lanzador para manejar el resultado de la selección del contacto
+        selectContactLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        handleSelectedContact(result.getData().getData());
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Selección de contacto cancelada.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+    }
+
+    /**
+     * Verifica el permiso y lo solicita si es necesario, o lanza el selector.
+     */
+    private void checkContactPermissionAndLaunchPicker() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) {
+
+            // Permiso ya concedido, lanzar selector
+            launchContactPicker();
+        } else {
+            // Solicitar permiso
+            requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+        }
+    }
+
+    /**
+     * Lanza la Intent para abrir la aplicación nativa de selección de contactos.
+     */
+    private void launchContactPicker() {
+        try {
+            // ACTION_PICK y ContactsContract.Contacts.CONTENT_URI abre el selector de contactos
+            Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+            selectContactLauncher.launch(intent);
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "No se pudo iniciar el selector de contactos.", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Procesa el URI del contacto seleccionado y extrae el nombre.
+     */
+    private void handleSelectedContact(Uri contactUri) {
+        String contactName = null;
+        if (contactUri == null) return;
+
+        // Solo pedimos el nombre visible (DISPLAY_NAME)
+        String[] projection = new String[]{ContactsContract.Contacts.DISPLAY_NAME};
+
+        try (Cursor cursor = requireContext().getContentResolver().query(contactUri, projection, null, null, null)) {
+
+            if (cursor != null && cursor.moveToFirst()) {
+                // Obtener el índice de la columna DISPLAY_NAME
+                int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                if (nameIndex != -1) {
+                    contactName = cursor.getString(nameIndex);
+                }
+            }
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error al leer contacto.", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+            return;
+        }
+
+        if (contactName != null && !contactName.isEmpty()) {
+            if (!selectedContacts.contains(contactName)) {
+                selectedContacts.add(contactName);
+                updateSelectedContactsText();
+                Toast.makeText(requireContext(), contactName + " añadido.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(), contactName + " ya ha sido añadido.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Actualiza el TextView con la lista de personas seleccionadas.
+     */
+    private void updateSelectedContactsText() {
+        if (selectedContacts.isEmpty()) {
+            textPersonasSeleccionadas.setText("Agregar personas");
+            // Usar un color por defecto (asumo que es onPrimaryContainer para el texto base)
+            textPersonasSeleccionadas.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_theme_onPrimaryContainer));
+        } else {
+            // Muestra los nombres separados por comas y un color de acento
+            String names = String.join(", ", selectedContacts);
+            textPersonasSeleccionadas.setText(names);
+            textPersonasSeleccionadas.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_theme_tertiary));
+        }
     }
 }
