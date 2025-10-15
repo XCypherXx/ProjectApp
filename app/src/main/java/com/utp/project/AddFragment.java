@@ -1,11 +1,17 @@
 package com.utp.project;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -21,9 +27,13 @@ public class AddFragment extends Fragment {
     private TextView textStartTime;
     private TextView textEndDate;
     private TextView textEndTime;
+    // Vistas de Notificación (NUEVAS)
+    private LinearLayout layoutNotificacion;
+    private TextView textNotificacion;
     private Calendar startCalendar;
     private Calendar endCalendar;
     private long timeDeltaMillis = 3600000; // 1 hora por defecto (3600 * 1000)
+    private int notificationMinutesBefore = 15; // 15 minutos por defecto
 
     public AddFragment() {
     }
@@ -40,17 +50,26 @@ public class AddFragment extends Fragment {
         textEndDate = view.findViewById(R.id.text_fecha2);
         textEndTime = view.findViewById(R.id.text_hora2);
 
+        // 1.b. Inicialización de Vistas (NOTIFICACIÓN)
+        layoutNotificacion = view.findViewById(R.id.layout_notificación);
+        // Asegúrate de que este ID (text_notificacion) exista en fragment_add.xml
+        textNotificacion = view.findViewById(R.id.text_notificacion);
+
         startCalendar = Calendar.getInstance();
         endCalendar = (Calendar) startCalendar.clone(); // Iniciar con la misma fecha/hora
 
         // 2. Establecer valores por defecto (Hora de fin +1 hora por defecto)
         applyTimeDelta();
+        updateNotificationText(); // Mostrar el valor inicial de la notificación
 
         // 3. Establecer Listeners
         textStartDate.setOnClickListener(v -> showStartDatePickerDialog());
         textStartTime.setOnClickListener(v -> showStartTimePickerDialog());
         textEndDate.setOnClickListener(v -> showEndDatePickerDialog());
         textEndTime.setOnClickListener(v -> showEndTimePickerDialog());
+
+        // Listener para Notificación (NUEVO)
+        layoutNotificacion.setOnClickListener(v -> showNotificationOptionsDialog());
 
         // Listener para botón de retroceso (si existe)
         view.findViewById(R.id.icon_menu).setOnClickListener(v -> {
@@ -231,5 +250,146 @@ public class AddFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", new Locale("es", "ES"));
         String formattedTime = sdf.format(calendar.getTime());
         textView.setText(formattedTime);
+    }
+
+    // LÓGICA DE NOTIFICACIÓN
+
+    /**
+     * Muestra el primer diálogo con opciones predefinidas y la opción "Personalizado".
+     */
+    private void showNotificationOptionsDialog() {
+        // Opciones de antelación en minutos
+        final int[] minutesOptions = {0, 5, 10, 15, 30, 60};
+        // Texto que verá el usuario
+        String[] optionNames = {
+                "A la hora del plan",
+                "5 minutos antes",
+                "10 minutos antes",
+                "15 minutos antes",
+                "30 minutos antes",
+                "1 hora antes",
+                "Personalizado..." // Opción especial que abre el segundo diálogo
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Seleccionar antelación");
+
+        builder.setItems(optionNames, (dialog, which) -> {
+            if (which == optionNames.length - 1) {
+                // Última opción: "Personalizado"
+                dialog.dismiss(); // Cierra el primer diálogo antes de abrir el segundo
+                showCustomNotificationDialog();
+            } else {
+                // Opción predefinida
+                notificationMinutesBefore = minutesOptions[which];
+                updateNotificationText();
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
+    }
+
+    /**
+     * Muestra el diálogo personalizado para ingresar un número y una unidad (Minutos/Horas/Días/Semanas).
+     */
+    private void showCustomNotificationDialog() {
+        // Inflar la vista personalizada. Asegúrate de que el archivo XML esté en res/layout/
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View customView = inflater.inflate(R.layout.dialog_custom_notification, null);
+
+        final EditText editNumber = customView.findViewById(R.id.edit_number_input);
+        final Spinner spinnerUnit = customView.findViewById(R.id.spinner_time_unit);
+
+        // Configurar el Spinner con las unidades de tiempo
+        String[] units = {"Minutos antes", "Horas antes", "Días antes", "Semanas antes"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, units);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerUnit.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Antelación Personalizada");
+        builder.setView(customView);
+
+        builder.setPositiveButton("Aceptar", (dialog, which) -> {
+            String numStr = editNumber.getText().toString().trim();
+            if (numStr.isEmpty()) {
+                Toast.makeText(requireContext(), "Por favor, ingresa un número.", Toast.LENGTH_SHORT).show();
+                // No retornar aquí para no cerrar el diálogo si la validación falla
+            } else {
+                try {
+                    int number = Integer.parseInt(numStr);
+                    if (number <= 0) {
+                        Toast.makeText(requireContext(), "El número debe ser mayor a cero.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        String unit = (String) spinnerUnit.getSelectedItem();
+                        int minutes = convertToMinutes(number, unit);
+
+                        notificationMinutesBefore = minutes;
+                        updateNotificationText();
+                        dialog.dismiss();
+                    }
+                } catch (NumberFormatException e) {
+                    Toast.makeText(requireContext(), "Número inválido.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    /**
+     * Convierte la cantidad y unidad seleccionada por el usuario a minutos.
+     */
+    private int convertToMinutes(int number, String unit) {
+        final int MINUTES_IN_HOUR = 60;
+        final int MINUTES_IN_DAY = MINUTES_IN_HOUR * 24;
+        final int MINUTES_IN_WEEK = MINUTES_IN_DAY * 7;
+
+        if (unit.equals("Minutos antes")) {
+            return number;
+        } else if (unit.equals("Horas antes")) {
+            return number * MINUTES_IN_HOUR;
+        } else if (unit.equals("Días antes")) {
+            return number * MINUTES_IN_DAY;
+        } else if (unit.equals("Semanas antes")) {
+            return number * MINUTES_IN_WEEK;
+        }
+        return 0; // En caso de error
+    }
+
+    /** * Actualiza el TextView con el texto de la antelación seleccionada,
+     * mostrando la unidad más grande posible (ej: 1440 min se muestra como 1 día).
+     */
+    private void updateNotificationText() {
+        String text;
+
+        if (notificationMinutesBefore == 0) {
+            text = "A la hora del plan";
+        } else {
+            // Unidades de tiempo en minutos
+            final int MIN_IN_HOUR = 60;
+            final int MIN_IN_DAY = 60 * 24;
+            final int MIN_IN_WEEK = 60 * 24 * 7;
+
+            // Determina la unidad más grande
+            if (notificationMinutesBefore % MIN_IN_WEEK == 0 && notificationMinutesBefore >= MIN_IN_WEEK) {
+                int totalWeeks = notificationMinutesBefore / MIN_IN_WEEK;
+                text = totalWeeks + " semana" + (totalWeeks > 1 ? "s" : "") + " antes";
+            } else if (notificationMinutesBefore % MIN_IN_DAY == 0 && notificationMinutesBefore >= MIN_IN_DAY) {
+                int totalDays = notificationMinutesBefore / MIN_IN_DAY;
+                text = totalDays + " día" + (totalDays > 1 ? "s" : "") + " antes";
+            } else if (notificationMinutesBefore % MIN_IN_HOUR == 0 && notificationMinutesBefore >= MIN_IN_HOUR) {
+                int totalHours = notificationMinutesBefore / MIN_IN_HOUR;
+                text = totalHours + " hora" + (totalHours > 1 ? "s" : "") + " antes";
+            } else {
+                // Si no es divisible o es menor que una hora, mostrar minutos
+                text = notificationMinutesBefore + " minutos antes";
+            }
+        }
+
+        textNotificacion.setText(text);
     }
 }
