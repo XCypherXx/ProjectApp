@@ -40,13 +40,14 @@
             tools2:ignore="UseAppTint" />
 
         <TextView
-            android:id="@+id/header_title"
+            android:id="@+id/calendar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Mi calendario"
             android:textColor="@color/md_theme_onPrimaryContainer"
             android:textSize="22sp"
             android:textStyle="bold"
+            android:clickable="true"
             app:layout_constraintStart_toEndOf="@+id/icon_menu"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
