@@ -1,7 +1,9 @@
 package com.utp.project;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -9,6 +11,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,11 +54,7 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
         binding.fab.setClickable(true);
         binding.fab.setContentDescription(getString(R.string.fab_add_task_description));
 
-        // Listener del FABB
-        binding.fab.setOnClickListener(v -> {
-            Toast.makeText(this, "FAB presionado", Toast.LENGTH_SHORT).show();
-            // Aquí puedes abrir un fragment o lanzar una Activity
-        });
+
 
 
         // -------------------
@@ -81,10 +80,14 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
         });
 
         binding.fab.setOnClickListener(v -> {
-            Toast.makeText(this, "FAB presionado", Toast.LENGTH_SHORT).show();
-
+            // 1) log / toast para confirmar ejecución
+            Log.d("FAB_DEBUG", "FAB click recibido en HomeActivity");
+            Toast.makeText(this, "escuchando", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(HomeActivity.this, VoiceChatActivity.class);
+            startActivity(intent);
 
         });
+
 
         // Inicialización del Sensor
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);

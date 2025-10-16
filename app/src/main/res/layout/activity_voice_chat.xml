@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+  tools:context=".VoiceChatActivity">
+
+    <!-- Botón de volver -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/btn_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_back"
+        app:tint="@color/black"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless" />
+
+    <!-- Texto superior -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Voz activada"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@id/btn_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+       app:layout_constraintBottom_toBottomOf="@id/btn_back" />
+
+    <!-- Esfera  imagen -->
+    <ImageView
+        android:id="@+id/voice_wave"
+        android:layout_width="390dp"
+        android:layout_height="390dp"
+        android:src="@drawable/orb"
+        android:contentDescription="Voice animation"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintBottom_toTopOf="@id/tv_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp"
+        />
+
+    <!-- Texto principal -->
+    <TextView
+        android:id="@+id/tv_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="👋 Hola, empieza a hablar cuando quieras."
+        android:textAlignment="center"
+        android:textColor="@color/black"
+
+        android:lineSpacingExtra="4dp"
+        android:textSize="25sp"
+        app:layout_constraintTop_toBottomOf="@id/voice_wave"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_mic"
+        android:layout_marginHorizontal="30dp" />
+
+    <!-- Texto "listening..." -->
+    <TextView
+        android:id="@+id/tv_listening"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Escuchando..."
+        android:textStyle="italic"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_message"
+        app:layout_constraintBottom_toTopOf="@id/btn_mic"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
+
+    <!-- Botón de micrófono -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_mic"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/ic_mic"
+        app:tint="@android:color/white"
+        app:maxImageSize="35dp"
+        app:useCompatPadding="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="70dp" />
+
+    <!-- Botón de chat -->
+    <ImageButton
+        android:id="@+id/btn_chat"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_msj"
+        android:background="?attr/selectableItemBackgroundBorderless"
+
+        app:layout_constraintBottom_toBottomOf="@id/btn_mic"
+        app:layout_constraintEnd_toStartOf="@id/btn_mic"
+        android:layout_marginEnd="52dp" />
+
+    <!-- Botón de cerrar -->
+    <ImageButton
+        android:id="@+id/btn_close"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:src="@drawable/ic_close"
+        android:background="?attr/selectableItemBackgroundBorderless"
+
+        app:layout_constraintBottom_toBottomOf="@id/btn_mic"
+        app:layout_constraintStart_toEndOf="@id/btn_mic"
+        android:layout_marginStart="52dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
