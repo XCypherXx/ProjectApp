@@ -11,6 +11,9 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import com.utp.project.R;
+
+
 
 public class NotificationHelper {
     public static final String CHANNEL_ID = "CANAL_UTP";
@@ -54,7 +57,8 @@ public class NotificationHelper {
                 ctx, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE
         );
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.icono_agenda)
+
                 .setContentTitle(title)
                 .setContentText(text)
                 .setContentIntent(emptyIntent)
