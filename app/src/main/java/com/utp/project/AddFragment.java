@@ -692,7 +692,7 @@ public class AddFragment extends Fragment {
 
     // NUEVO: Guardar en Firestore
     private void saveActividadFirestore() {
-        // TODO: reemplazar con EditText real del título si existe
+        // reemplazar con EditText real del título si existe
         String titulo = "Nueva actividad";
 
         Timestamp inicio = new Timestamp(startCalendar.getTime());

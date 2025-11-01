@@ -128,7 +128,7 @@ public class HomeFragment extends Fragment {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "Tienes " + total + " actividades.", Toast.LENGTH_SHORT).show();
             }
-            // TODO: Mapear snap.getDocuments() a tu lista/adapter real cuando lo definas
+            // Mapear snap.getDocuments() a tu lista/adapter real cuando lo definas
         });
 
         getViewLifecycleOwner().getLifecycle().addObserver(new androidx.lifecycle.DefaultLifecycleObserver() {
