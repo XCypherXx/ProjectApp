@@ -48,6 +48,8 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.utp.project.databinding.ActivityHomeBinding;
 import com.utp.project.databinding.FragmentHomeBinding;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 public class HomeFragment extends Fragment {
@@ -72,23 +74,26 @@ public class HomeFragment extends Fragment {
         // ImageView profileImage = findViewById(R.id.profile_image);
 
         if (user != null) {
-            // Mostrar nombre
             String name = user.getDisplayName();
+            if (name == null || name.trim().isEmpty()) {
+                SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                String currentUser = prefs.getString("currentUser", null);
+                name = (currentUser != null && !currentUser.isEmpty()) ? currentUser : "admin";
+            }
             binding.userGreeting.setText("Hola, " + name);
 
-            // Mostrar foto (si tiene)
             if (user.getPhotoUrl() != null) {
                 Glide.with(this)
                         .load(user.getPhotoUrl())
                         .circleCrop()
                         .into(binding.profileImage);
+            } else {
+                binding.profileImage.setImageResource(R.drawable.ic_user_default);
             }
         } else {
-            // Caso 2: Usuario registrado localmente
             SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-            String currentUser = prefs.getString("currentUser", null);
+            String currentUser = prefs.getString("currentUser", "admin");
             binding.userGreeting.setText("Hola, " + currentUser + " 👋");
-            //prueba por default
             binding.profileImage.setImageResource(R.drawable.ic_user_default);
         }
 
@@ -114,6 +119,25 @@ public class HomeFragment extends Fragment {
             Category clicked = categoryList.get(position);
             Toast.makeText(getContext(), "Clicked: " + clicked.getName(), Toast.LENGTH_SHORT).show();
         });
+        // NUEVO: Suscripción a actividades del usuario
+        final ListenerRegistration[] reg = new ListenerRegistration[1];
+
+        reg[0] = com.utp.project.data.FirestoreService.listenActividades((snap, e) -> {
+            if (e != null || snap == null) return;
+            int total = snap.size();
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "Tienes " + total + " actividades.", Toast.LENGTH_SHORT).show();
+            }
+            // TODO: Mapear snap.getDocuments() a tu lista/adapter real cuando lo definas
+        });
+
+        getViewLifecycleOwner().getLifecycle().addObserver(new androidx.lifecycle.DefaultLifecycleObserver() {
+            @Override
+            public void onDestroy(@androidx.annotation.NonNull androidx.lifecycle.LifecycleOwner owner) {
+                if (reg[0] != null) reg[0].remove();
+            }
+        });
+
         return view;
 
 

@@ -92,13 +92,17 @@ public class OnboardingActivity extends AppCompatActivity {
     }
 
     private void openHome() {
-        // Guardar en SharedPreferences que ya vio onboarding
-        getSharedPreferences("prefs", MODE_PRIVATE)
-                .edit()
-                .putBoolean("isFirstTime", false)
-                .apply();
-
-        // Abrir Home
+        String userId = null;
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+        if (userId != null) {
+            String key = "isFirstTime_" + userId;
+            getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                    .edit()
+                    .putBoolean(key, false)
+                    .apply();
+        }
         startActivity(new Intent(OnboardingActivity.this, HomeActivity.class));
         finish();
     }

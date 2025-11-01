@@ -38,6 +38,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.android.gms.common.api.Status;
 import android.content.pm.PackageManager;
 import android.Manifest; // Necesario para el permiso de contactos
+import com.google.firebase.Timestamp;
+import com.google.android.gms.tasks.Task;
 
 public class AddFragment extends Fragment {
 
@@ -142,6 +144,12 @@ public class AddFragment extends Fragment {
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
+
+        // NUEVO: Guardar actividad en Firestore si el botón existe en el layout
+        View btnGuardar = view.findViewById(R.id.btn_guardar);
+        if (btnGuardar != null) {
+            btnGuardar.setOnClickListener(v -> saveActividadFirestore());
+        }
 
         return view;
     }
@@ -680,5 +688,38 @@ public class AddFragment extends Fragment {
             textPersonasSeleccionadas.setText(names);
             textPersonasSeleccionadas.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_theme_tertiary));
         }
+    }
+
+    // NUEVO: Guardar en Firestore
+    private void saveActividadFirestore() {
+        // TODO: reemplazar con EditText real del título si existe
+        String titulo = "Nueva actividad";
+
+        Timestamp inicio = new Timestamp(startCalendar.getTime());
+        Timestamp fin = new Timestamp(endCalendar.getTime());
+
+        java.util.Map<String, Object> actividad = com.utp.project.data.FirestoreService.buildActividad(
+                titulo,
+                inicio,
+                fin,
+                null,           // descripcion
+                "pendiente",    // estado
+                null,           // categoria
+                selectedLocationAddress,
+                latitude != 0.0 ? latitude : null,
+                longitude != 0.0 ? longitude : null,
+                notificationMinutesBefore
+        );
+
+        com.utp.project.data.FirestoreService.addActividad(actividad)
+                .addOnSuccessListener(ref -> {
+                    Toast.makeText(requireContext(), "Actividad guardada", Toast.LENGTH_SHORT).show();
+                    if (getActivity() != null) {
+                        getActivity().getSupportFragmentManager().popBackStack();
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(), "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
     }
 }

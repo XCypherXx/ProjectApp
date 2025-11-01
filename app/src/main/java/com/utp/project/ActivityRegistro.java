@@ -92,7 +92,6 @@ public class ActivityRegistro extends AppCompatActivity {
             String password = editTextPassword.getText().toString().trim();
             String confirmPassword = editTextConfirmPassword.getText().toString().trim();
 
-            // Limpiar errores anteriores
             textInputLayoutPassword.setError(null);
             textInputLayoutConfirmPassword.setError(null);
 
@@ -106,17 +105,41 @@ public class ActivityRegistro extends AppCompatActivity {
                 return;
             }
 
-            // Guardar en SharedPreferences
+            // Guardar nombre en SharedPreferences para mostrar en Home
             SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
             prefs.edit()
                     .putString("username", username)
                     .putString("password", password)
                     .putString("currentUser", username)
-                    // .putBoolean("isFirstTime", true)
                     .apply();
 
-            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-            openNextScreen(username);
+            // NUEVO: Autenticación anónima en Firebase y luego actualizar nombre
+            mAuth.signInAnonymously()
+                    .addOnSuccessListener(authResult -> {
+                        // Actualizar displayName del usuario
+                        com.google.firebase.auth.UserProfileChangeRequest req =
+                                new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                                        .setDisplayName(username)
+                                        .build();
+                        mAuth.getCurrentUser().updateProfile(req)
+                                .addOnCompleteListener(task -> {
+                                    // Guardar en Firestore con nombre en perfil
+                                    java.util.Map<String, Object> extra = new java.util.HashMap<>();
+                                    java.util.Map<String, Object> perfil = new java.util.HashMap<>();
+                                    perfil.put("nombre", username);
+                                    extra.put("perfil", perfil);
+
+                                    com.utp.project.data.FirestoreService.ensureUserDocument(extra)
+                                            .addOnSuccessListener(aVoid -> {
+                                                Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                                                // Abrir onboarding (ya sabemos que es primera vez)
+                                                openNextScreen(mAuth.getCurrentUser().getUid());
+                                            });
+                                });
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Error al registrarse: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                    );
         });
 
         // Deshabilitar el botón de registro por defecto
@@ -239,21 +262,15 @@ public class ActivityRegistro extends AppCompatActivity {
 
     private void openNextScreen(String userId) {
         SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-    // una sola bandera
-        //boolean isFirstTime = prefs.getBoolean("isFirstTime", true);
-
-        //   para el onboarding  clave única por usuario
         String key = "isFirstTime_" + userId;
 
         boolean isFirstTime = prefs.getBoolean(key, true);
         if (isFirstTime) {
-            // Guardar que ya vio onboarding
-            prefs.edit().putBoolean("isFirstTime", false).apply();
-            // Abrir onboarding
+            // Aún no vio onboarding → ir a onboarding sin marcarla aquí
             Intent intent = new Intent(ActivityRegistro.this, OnboardingActivity.class);
             startActivity(intent);
         } else {
-            // Abrir Home directamente
+            // Ya vio onboarding → ir directo a Home
             Intent intent = new Intent(ActivityRegistro.this, HomeActivity.class);
             startActivity(intent);
         }
