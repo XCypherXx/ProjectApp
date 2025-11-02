@@ -27,6 +27,9 @@ import com.utp.project.databinding.ActivityHomeBinding;
 
 //Importacion para Place SDK
 import com.google.android.libraries.places.api.Places;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.Timestamp;
 
 public class HomeActivity extends AppCompatActivity implements SensorEventListener {
     // private RecyclerView categoryRecyclerView;
@@ -54,6 +57,16 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // NUEVO: garantizar sesión (anónima si no hay) y merge de documento usuario
+        FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+        if (current == null) {
+            FirebaseAuth.getInstance().signInAnonymously()
+                    .addOnSuccessListener(r -> com.utp.project.data.FirestoreService.ensureUserDocument(null))
+                    .addOnFailureListener(e -> Toast.makeText(this, "Error autenticación anónima: " + e.getMessage(), Toast.LENGTH_LONG).show());
+        } else {
+            com.utp.project.data.FirestoreService.ensureUserDocument(null);
+        }
 
         // Solo inicializa si no ha sido inicializado antes
         if (!Places.isInitialized() && !GOOGLE_API_KEY.isEmpty()) {

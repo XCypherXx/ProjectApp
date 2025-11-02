@@ -88,27 +88,18 @@ public class LoginActivity extends AppCompatActivity {
         btnGoogle = findViewById(R.id.btnGoogle);
         btnFacebook = findViewById(R.id.btnFacebook);
 
-        // Listener del botón Ingresar (Login Clásico con SharedPreferences)
-        buttonIngresar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String usuarioIngresado = editTextUsuario.getText().toString().trim();
-                String passwordIngresada = editTextPassword.getText().toString().trim();
-
-                SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                prefs.edit()
-                        .putString("currentUser", usuarioIngresado) //  loguea ahora
-                        .apply();
-                String usuarioGuardado = prefs.getString("username", "");
-                String passwordGuardada = prefs.getString("password", "");
-
-                if (usuarioIngresado.equals(usuarioGuardado) && passwordIngresada.equals(passwordGuardada)) {
-                    Toast.makeText(LoginActivity.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
-                    openHomeActivity();
-                } else {
-                    Toast.makeText(LoginActivity.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
-                }
-            }
+        // Listener del botón Ingresar (Login FireBase)
+        buttonIngresar.setOnClickListener(v -> {
+            // Login anónimo en Firebase (para pruebas)
+            mAuth.signInAnonymously()
+                    .addOnSuccessListener(r -> {
+                        // Crea/merge doc de usuario
+                        com.utp.project.data.FirestoreService.ensureUserDocument(null)
+                                .addOnCompleteListener(x -> openHomeActivity());
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(LoginActivity.this, "Error autenticación anónima: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                    );
         });
 
         // [GOOGLE] Listener para botón de Google
@@ -173,7 +164,9 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(this, "Inicio de sesión exitoso con Google: " + user.getEmail(), Toast.LENGTH_SHORT).show();
-                        openHomeActivity();
+                        // NUEVO: crear/merge doc de usuario en Firestore
+                        com.utp.project.data.FirestoreService.ensureUserDocument(null)
+                                .addOnCompleteListener(x -> openHomeActivity());
                     } else {
                         Toast.makeText(this, "Falló el inicio de sesión con Google: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
@@ -195,7 +188,9 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(this, "Inicio de sesión exitoso con Facebook: " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                        openHomeActivity();
+                        // NUEVO: crear/merge doc de usuario en Firestore
+                        com.utp.project.data.FirestoreService.ensureUserDocument(null)
+                                .addOnCompleteListener(x -> openHomeActivity());
                     } else {
                         Log.e("FacebookAuth", "Falló la autenticación de Firebase con Facebook", task.getException());
                         Toast.makeText(this, "Falló la autenticación de Firebase con Facebook: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
