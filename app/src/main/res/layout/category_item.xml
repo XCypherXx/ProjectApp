@@ -44,9 +44,11 @@
             android:textColor="@color/md_theme_onPrimaryContainer" />
 
 <TextView
+    android:id="@+id/categoryProgress"
+
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="45%"
+    android:text="0%"
     android:textStyle="bold"
     android:textColor="@color/md_theme_onPrimaryContainer"  />
 

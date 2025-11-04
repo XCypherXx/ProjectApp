@@ -13,10 +13,16 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.utp.project.adapters.CalendarAdapter;
 import com.utp.project.adapters.PlanAdapter;
 import com.utp.project.models.CalendarDayModel;
 import com.utp.project.models.PlanModel;
+
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +46,13 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
 
     private TextView textFechaToday;
 
+    // Adaptadores para los RecyclerViews de planes
+    private PlanAdapter proximosPlanesAdapter;
+    private PlanAdapter planesTerminadosAdapter;
+    private List<PlanModel> proximosPlanesList;
+    private List<PlanModel> planesTerminadosList;
+    private ListenerRegistration actividadesListener;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -58,7 +71,19 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
 
         setupPlanesTerminados(view); // <-- LLAMADA PARA INICIALIZAR LA LISTA DE PLANES TERMINADOS
 
+        // Cargar actividades desde Firestore
+        loadActividadesFromFirestore();
+
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Limpiar el listener cuando se destruye la vista
+        if (actividadesListener != null) {
+            actividadesListener.remove();
+        }
     }
 
     private void setCurrentDate() {
@@ -208,53 +233,231 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
     private void setupProximosPlanes(View view) {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_proximos_planes);
 
-        // 1. Crear la lista de datos de ejemplo (¡Asegúrate de definir estos colores en R.color!)
-        List<PlanModel> planes = new ArrayList<>();
+        // Inicializar lista vacía que se llenará con datos de Firestore
+        proximosPlanesList = new ArrayList<>();
 
-        // Nota: Reemplaza R.color.yellow_bar y R.color.yellow_background_alpha con tus colores reales
-        // que imiten el #FFE100 y el #60FFE100 de tu XML.
-
-        // Ejemplo Plan 1 (Amarillo)
-        planes.add(new PlanModel(
-                "Preparar mi cena",
-                "11:45 PM - 12:00 AM",
-                R.color.yellow_bar, // Color sólido para la barra lateral
-                R.color.yellow_background_alpha // Color semitransparente para el fondo
-        ));
-
-        // Ejemplo Plan 2 (Amarillo)
-        planes.add(new PlanModel(
-                "Dormir",
-                "12:00 AM - 06:00 AM",
-                R.color.yellow_bar,
-                R.color.yellow_background_alpha
-        ));
-
-        // 2. Configurar el LayoutManager (vertical) y el Adaptador
+        // Configurar el LayoutManager (vertical) y el Adaptador
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        PlanAdapter adapter = new PlanAdapter(getContext(), planes);
-        recyclerView.setAdapter(adapter);
+        proximosPlanesAdapter = new PlanAdapter(
+                getContext(),
+                proximosPlanesList,
+                R.layout.item_plan_proximo,
+                (actividadId, completed) -> {
+                    if (actividadId == null) return;
+                    java.util.Map<String, Object> campos = new java.util.HashMap<>();
+                    campos.put("estado", completed ? "completado" : "pendiente");
+                    com.utp.project.data.FirestoreService.updateActividad(actividadId, campos);
+                }
+        );
+        recyclerView.setAdapter(proximosPlanesAdapter);
     }
+
     private void setupPlanesTerminados(View view) {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_planes_terminados);
 
-        // 1. Crear la lista de datos de ejemplo
-        List<PlanModel> planesTerminados = new ArrayList<>();
+        // Inicializar lista vacía que se llenará con datos de Firestore
+        planesTerminadosList = new ArrayList<>();
 
-        // ¡Asegúrate de definir R.color.red_bar y R.color.red_background_alpha en R.color!
-
-        // Ejemplo Plan 1 (Rojo)
-        planesTerminados.add(new PlanModel(
-                "Preparar mi cena",
-                "11:45 PM - 12:00 AM",
-                R.color.red_bar, // Color sólido para la barra lateral (rojo #FF0000)
-                R.color.red_background_alpha // Color semitransparente para el fondo (rojo #60FF0000)
-        ));
-
-        // 2. Configurar el LayoutManager y el Adaptador
+        // Configurar el LayoutManager y el Adaptador
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        // ¡REUTILIZAMOS EL MISMO ADAPTADOR!
-        PlanAdapter adapter = new PlanAdapter(getContext(), planesTerminados);
-        recyclerView.setAdapter(adapter);
+        planesTerminadosAdapter = new PlanAdapter(
+                getContext(),
+                planesTerminadosList,
+                R.layout.item_plan_terminado,
+                (actividadId, completed) -> {
+                    if (actividadId == null) return;
+                    java.util.Map<String, Object> campos = new java.util.HashMap<>();
+                    campos.put("estado", completed ? "completado" : "pendiente");
+                    com.utp.project.data.FirestoreService.updateActividad(actividadId, campos);
+                }
+        );
+        recyclerView.setAdapter(planesTerminadosAdapter);
+    }
+
+    /**
+     * Carga las actividades desde Firestore y las separa en próximos y terminados
+     */
+    private void loadActividadesFromFirestore() {
+        actividadesListener = com.utp.project.data.FirestoreService.listenActividades((snap, e) -> {
+            if (e != null) {
+                Toast.makeText(getContext(), "Error al cargar actividades: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (snap == null || snap.isEmpty()) {
+                // Limpiar_todo
+                proximosPlanesList.clear();
+                planesTerminadosList.clear();
+                clearCurrentPlanUI();
+                proximosPlanesAdapter.notifyDataSetChanged();
+                planesTerminadosAdapter.notifyDataSetChanged();
+                return;
+            }
+
+            // Obtener la fecha de hoy para filtrar
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            Calendar tomorrow = (Calendar) today.clone();
+            tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+
+            // Limpiar las listas
+            proximosPlanesList.clear();
+            planesTerminadosList.clear();
+
+            PlanModel planEnCurso = null;
+            // Procesar cada documento
+            for (DocumentSnapshot doc : snap.getDocuments()) {
+                PlanModel plan = convertDocumentToPlanModel(doc);
+                if (plan == null) continue;
+
+                Timestamp fechaInicio = doc.getTimestamp("fechaInicio");
+                String estado = doc.getString("estado");
+
+                if (fechaInicio != null) {
+                    Calendar fechaInicioCal = Calendar.getInstance();
+                    fechaInicioCal.setTimeInMillis(fechaInicio.toDate().getTime());
+
+                    // Verificar si la actividad es de hoy
+                    boolean isToday = fechaInicioCal.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                            fechaInicioCal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR);
+                   // boolean isFuture = fechaInicioCal.getTimeInMillis() >= tomorrow.getTimeInMillis();
+                    boolean isFuture = fechaInicioCal.after(today);
+                    if (estado != null && estado.equals("completado")) {
+                        planesTerminadosList.add(plan);
+                    } else if (isToday) {
+                        // Solo debe haber uno "en curso" hoy
+                        if (planEnCurso == null) planEnCurso = plan;
+                    } else if (isFuture) {
+                        proximosPlanesList.add(plan);
+                    }
+                }
+            }
+
+            // Ordenar Próximos planes por fecha de inicio (ascendente)
+            proximosPlanesList.sort((a, b) -> Long.compare(a.getStartTimeMs(), b.getStartTimeMs()));
+            proximosPlanesAdapter.notifyDataSetChanged();
+            planesTerminadosAdapter.notifyDataSetChanged();
+
+            // Mostrar plan en curso (si existe)
+            if (planEnCurso != null) {
+                updateCurrentPlanUI(planEnCurso);
+            } else {
+                clearCurrentPlanUI();
+            }
+        });
+    }
+
+
+    /**
+     * Muestra el plan actual en la tarjeta de "Plan en curso"
+     */
+    private void updateCurrentPlanUI(PlanModel plan) {
+        View view = getView();
+        if (view == null) return;
+
+        TextView time = view.findViewById(R.id.text_current_plan_time);
+        TextView title = view.findViewById(R.id.text_current_plan_title);
+        TextView details = view.findViewById(R.id.text_current_plan_details);
+        LinearProgressIndicator progress = view.findViewById(R.id.progress_current_plan);
+
+        // Mostrar solo la hora final del rango (si existe)
+        String horaFinal;
+        String[] partes = plan.getTimeRange().split("-");
+        if (partes.length > 1) {
+            horaFinal = partes[1].trim(); // ejemplo: "10:00 AM"
+        } else {
+            horaFinal = plan.getTimeRange(); // fallback si no hay "-"
+        }
+
+        time.setText(horaFinal);
+        title.setText("Siguiente actividad: " + plan.getTitle());
+        details.setText("Plan pendiente para hoy");
+
+        progress.setProgress(0, true);
+    }
+
+    /**
+     * Limpia la tarjeta "Plan en curso" cuando no hay actividades para hoy
+     */
+    private void clearCurrentPlanUI() {
+        View view = getView();
+        if (view == null) return;
+
+        TextView time = view.findViewById(R.id.text_current_plan_time);
+        TextView title = view.findViewById(R.id.text_current_plan_title);
+        TextView details = view.findViewById(R.id.text_current_plan_details);
+        LinearProgressIndicator progress = view.findViewById(R.id.progress_current_plan);
+
+        time.setText("--:--");
+        title.setText("Sin planes para hoy");
+        details.setText("No tienes actividades pendientes hoy.");
+        progress.setProgress(0);
+    }
+
+
+    /**
+     * Convierte un DocumentSnapshot de Firestore a un PlanModel
+     */
+    private PlanModel convertDocumentToPlanModel(DocumentSnapshot doc) {
+        try {
+            String id = doc.getId();
+            String titulo = doc.getString("titulo");
+            if (titulo == null || titulo.isEmpty()) {
+                titulo = "Sin título";
+            }
+
+            // Obtener las fechas de inicio y fin
+            Timestamp fechaInicio = doc.getTimestamp("fechaInicio");
+            Timestamp fechaFin = doc.getTimestamp("fechaFin");
+
+            String timeRange = "Sin hora";
+            if (fechaInicio != null && fechaFin != null) {
+                timeRange = formatTimeRange(fechaInicio.toDate(), fechaFin.toDate());
+            } else if (fechaInicio != null) {
+                timeRange = formatTime(fechaInicio.toDate());
+            }
+
+            // Determinar el color según el estado
+            String estado = doc.getString("estado");
+            int colorBar;
+            int colorBackground;
+
+            boolean completed = (estado != null && estado.equals("completado"));
+            if (completed) {
+                // Rojo para terminados
+                colorBar = R.color.red_bar;
+                colorBackground = R.color.red_background_alpha;
+            } else {
+                // Amarillo para pendientes
+                colorBar = R.color.yellow_bar;
+                colorBackground = R.color.yellow_background_alpha;
+            }
+
+            long startMs = fechaInicio != null ? fechaInicio.toDate().getTime() : Long.MAX_VALUE;
+            return new PlanModel(id, titulo, timeRange, colorBar, colorBackground, completed, startMs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Formatea un rango de tiempo en formato "HH:mm AM/PM - HH:mm AM/PM"
+     */
+    private String formatTimeRange(java.util.Date inicio, java.util.Date fin) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", new Locale("es", "ES"));
+        return sdf.format(inicio) + " - " + sdf.format(fin);
+    }
+
+    /**
+     * Formatea una fecha en formato "HH:mm AM/PM"
+     */
+    private String formatTime(java.util.Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", new Locale("es", "ES"));
+        return sdf.format(date);
     }
 }

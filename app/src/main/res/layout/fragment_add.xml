@@ -12,7 +12,7 @@
     <View
         android:id="@+id/top_background"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="872dp"
         android:layout_marginTop="112dp"
         android:background="@drawable/rounded_top_dark_background" />
 
@@ -263,6 +263,138 @@
             android:layout_marginTop="5dp"
             android:background="@color/md_theme_onSecondaryContainer"/>
 
+        <!-- PRIORIDAD -->
+        <LinearLayout
+            android:id="@+id/layout_prioridad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent">
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:src="@drawable/ic_noti"
+                android:tint="@color/md_theme_onTertiary"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                tools:ignore="UseAppTint" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Prioridad"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
+
+            <Spinner
+                android:id="@+id/spinner_prioridad"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="40dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
+        <!-- CATEGORÍA -->
+        <LinearLayout
+            android:id="@+id/layout_categoria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="7dp"
+            android:background="@android:color/transparent">
+
+            <ImageView
+                android:id="@+id/icon_color_marker"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:src="@drawable/ic_color"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:tint="@color/md_theme_onTertiary"
+                tools:ignore="UseAppTint" />
+
+            <!-- Campo para mostrar la categoría seleccionada -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
+                app:hintEnabled="false"
+                app:boxBackgroundMode="none">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_text_categoria"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:hint="categoria"
+                    android:inputType="none"
+                    android:maxLength="50"
+                    android:maxLines="1"
+                    android:textColor="@color/md_theme_secondaryContainer"
+                    android:textColorHint="@color/md_theme_secondaryContainer"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Contenedor de vista previa del ícono + botón -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="15dp">
+
+                <ImageView
+                    android:id="@+id/icon_categoria_preview"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_work"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Vista previa del ícono"
+                    android:padding="4dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_elegir_categoria"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="selecionar"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:textColor="@color/md_theme_onTertiaryContainer"
+                    android:backgroundTint="@color/md_theme_tertiaryContainer"
+                    app:cornerRadius="20dp"
+
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    app:iconTint="@color/md_theme_onTertiaryContainer"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/md_theme_onSecondaryContainer"/>
+
         <LinearLayout
             android:id="@+id/layout_repetir"
             android:layout_width="match_parent"
@@ -477,22 +609,21 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_text_description"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Agregar descripción"
-                    android:gravity="top|start"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:minLines="2"
-                    android:maxLines="8"
-                    android:inputType="textMultiLine|textCapSentences"
+                    android:layout_height="43dp"
                     android:background="@android:color/transparent"
+                    android:gravity="top|start"
+                    android:hint="Agregar descripción"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLines="8"
+                    android:minLines="2"
+                    android:paddingStart="0dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="0dp"
+                    android:paddingBottom="10dp"
                     android:textColor="@color/md_theme_secondaryContainer"
                     android:textColorHint="@color/md_theme_secondaryContainer"
-                    android:paddingStart="0dp"
-                    android:paddingEnd="0dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    />
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -503,13 +634,13 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="25dp"
             android:layout_marginBottom="25dp"
+            android:backgroundTint="@color/md_theme_tertiaryContainer"
             android:paddingHorizontal="25dp"
             android:paddingVertical="12dp"
             android:text="Guardar"
+            android:textColor="@color/md_theme_onTertiaryContainer"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:backgroundTint="@color/md_theme_tertiaryContainer"
-            android:textColor="@color/md_theme_onTertiaryContainer"
             app:cornerRadius="30dp" />
 
     </LinearLayout>

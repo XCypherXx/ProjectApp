@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/input_category_name"
+        android:hint="Nombre de la categoría"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLength="50"
+        android:inputType="textCapWords" />
+
+    <ImageView
+        android:id="@+id/icon_preview"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="12dp"
+        android:src="@drawable/ic_work" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_elegir_icono"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Elegir icono"
+        android:layout_marginTop="8dp" />
+</LinearLayout>

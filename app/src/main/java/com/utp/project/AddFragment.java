@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -26,8 +27,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 // Nuevas importaciones necesarias para Ubicación (Asegúrate de tener el SDK de Places)
 import com.google.android.libraries.places.api.model.Place;
@@ -38,8 +41,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.android.gms.common.api.Status;
 import android.content.pm.PackageManager;
 import android.Manifest; // Necesario para el permiso de contactos
+
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.Timestamp;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 public class AddFragment extends Fragment {
 
@@ -58,6 +65,15 @@ public class AddFragment extends Fragment {
     private LinearLayout layoutAgregarPersonas;
     private TextView textPersonasSeleccionadas; // Muestra los nombres de los contactos
 
+    // VISTAS DE TÍTULO Y DESCRIPCIÓN
+    private EditText editTextTitle;
+    private EditText editTextDescription;
+    private Spinner spinnerPrioridad;
+    private EditText editTextCategoria;
+    private android.widget.ImageView iconCategoriaPreview;
+    private android.net.Uri categoriaIconUri;
+    private ActivityResultLauncher<Intent> selectImageLauncher;
+
     private Calendar startCalendar;
     private Calendar endCalendar;
     private long timeDeltaMillis = 3600000; // 1 hora por defecto (3600 * 1000)
@@ -74,6 +90,7 @@ public class AddFragment extends Fragment {
     private ActivityResultLauncher<Intent> startAutocomplete;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private ActivityResultLauncher<Intent> selectContactLauncher;
+    private String selectedCategoryIconRef = null; // guarda el ícono de la categoría elegida o creada
 
     public AddFragment() {
     }
@@ -111,6 +128,33 @@ public class AddFragment extends Fragment {
         layoutAgregarPersonas = view.findViewById(R.id.layout_agregarPersonas);
         textPersonasSeleccionadas = view.findViewById(R.id.text_personas_seleccionadas);
 
+        // VISTAS DE TÍTULO Y DESCRIPCIÓN
+        editTextTitle = view.findViewById(R.id.edit_text_title);
+        editTextDescription = view.findViewById(R.id.edit_text_description);
+        spinnerPrioridad = view.findViewById(R.id.spinner_prioridad);
+        editTextCategoria = view.findViewById(R.id.edit_text_categoria);
+        iconCategoriaPreview = view.findViewById(R.id.icon_categoria_preview);
+
+        // Lanzador para elegir imagen del icono de categoría
+        selectImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        android.net.Uri uri = result.getData().getData();
+                        if (uri != null) {
+                            categoriaIconUri = uri;
+                            iconCategoriaPreview.setImageURI(uri);
+                        }
+                    }
+                }
+        );
+
+        // Configurar opciones del spinner de prioridad
+        ArrayAdapter<String> prioridadAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item,
+                new String[]{"Alta", "Media", "Baja"});
+        prioridadAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPrioridad.setAdapter(prioridadAdapter);
+
         startCalendar = Calendar.getInstance();
         endCalendar = (Calendar) startCalendar.clone(); // Iniciar con la misma fecha/hora
 
@@ -138,6 +182,17 @@ public class AddFragment extends Fragment {
         // NUEVO: Listener para Agregar Personas
         layoutAgregarPersonas.setOnClickListener(v -> checkContactPermissionAndLaunchPicker());
 
+        // --- CATEGORÍA --- //
+        editTextCategoria.setFocusable(false);
+        editTextCategoria.setClickable(true);
+        editTextCategoria.setOnClickListener(v -> showCategoryPickerDialog());
+
+        View btnElegirCategoria = view.findViewById(R.id.btn_elegir_categoria);
+        if (btnElegirCategoria != null) {
+            btnElegirCategoria.setOnClickListener(v -> showCategoryPickerDialog());
+        }
+
+
         // Listener para botón de retroceso (si existe)
         view.findViewById(R.id.icon_menu).setOnClickListener(v -> {
             if (getActivity() != null) {
@@ -152,7 +207,169 @@ public class AddFragment extends Fragment {
         }
 
         return view;
+
     }
+
+    private void showIconSelectionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Seleccionar icono de categoría");
+
+        // Lista de nombres que el usuario verá
+        String[] iconNames = {"Casa", "Trabajo", "Escuela", "Salud", "Subir desde galería"};
+
+        // Inflar vista personalizada con iconos (opcional, versión simple con lista de texto)
+        builder.setItems(iconNames, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    setDefaultCategoryIcon(R.drawable.ic_home);
+                    break;
+                case 1:
+                    setDefaultCategoryIcon(R.drawable.ic_work);
+                    break;
+                case 2:
+                    setDefaultCategoryIcon(R.drawable.ic_school);
+                    break;
+                case 3:
+                    setDefaultCategoryIcon(R.drawable.ic_health);
+                    break;
+                case 4:
+                    pickIconFromGallery();
+                    break;
+            }
+        });
+
+        builder.show();
+    }
+
+    // === NUEVO MÉTODO ===
+// Muestra todas las categorías guardadas en Firestore y permite crear una nueva
+    private void showCategoryPickerDialog() {
+        FirebaseFirestore.getInstance()
+                .collection("categorias")
+                .get()
+                .addOnSuccessListener(query -> {
+                    List<String> categoryNames = new ArrayList<>();
+                    List<String> categoryIcons = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : query) {
+                        categoryNames.add(doc.getString("nombre"));
+                        categoryIcons.add(doc.getString("icono"));
+                    }
+
+                    // Añadir opción extra
+                    categoryNames.add("➕ Crear nueva categoría");
+                    categoryIcons.add(null);
+
+                    String[] items = categoryNames.toArray(new String[0]);
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                    builder.setTitle("Seleccionar categoría");
+                    builder.setItems(items, (dialog, which) -> {
+                        if (which == items.length - 1) {
+                            showCreateCategoryDialog(); // Crear nueva categoría
+                        } else {
+                            String nombre = categoryNames.get(which);
+                            String icono = categoryIcons.get(which);
+                            editTextCategoria.setText(nombre);
+                            setCategoryIcon(icono);
+                        }
+                    });
+                    builder.show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(requireContext(),
+                        "Error al cargar categorías", Toast.LENGTH_SHORT).show());
+    }
+
+    // Abre un diálogo simple para crear una nueva categoría con nombre + icono
+    private void showCreateCategoryDialog() {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View view = inflater.inflate(R.layout.dialog_add_category, null);
+
+        EditText inputNombre = view.findViewById(R.id.input_category_name);
+        ImageView iconPreview = view.findViewById(R.id.icon_preview);
+        MaterialButton btnElegirIcono = view.findViewById(R.id.btn_elegir_icono);
+
+        final Uri[] selectedUri = {null};
+        final int[] selectedResId = {R.drawable.ic_work};
+
+        btnElegirIcono.setOnClickListener(v -> {
+            String[] opciones = {"Casa", "Escuela", "Trabajo", "Salud", "Desde galería"};
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Elegir icono")
+                    .setItems(opciones, (dialog, which) -> {
+                        switch (which) {
+                            case 0: selectedResId[0] = R.drawable.ic_home; iconPreview.setImageResource(R.drawable.ic_home); break;
+                            case 1: selectedResId[0] = R.drawable.ic_school; iconPreview.setImageResource(R.drawable.ic_school); break;
+                            case 2: selectedResId[0] = R.drawable.ic_work; iconPreview.setImageResource(R.drawable.ic_work); break;
+                            case 3: selectedResId[0] = R.drawable.ic_health; iconPreview.setImageResource(R.drawable.ic_health); break;
+                            case 4:
+                                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                selectImageLauncher.launch(intent);
+                                break;
+                        }
+                    }).show();
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Nueva categoría");
+        builder.setView(view);
+        builder.setPositiveButton("Guardar", (dialog, which) -> {
+            String nombre = inputNombre.getText().toString().trim();
+            if (nombre.isEmpty()) {
+                Toast.makeText(requireContext(), "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String iconRef = selectedUri[0] != null ? selectedUri[0].toString() :
+                    getResources().getResourceEntryName(selectedResId[0]);
+
+            saveCategoriaFirestore(nombre, iconRef);
+            editTextCategoria.setText(nombre);
+            setCategoryIcon(iconRef);
+        });
+        builder.setNegativeButton("Cancelar", null);
+        builder.show();
+    }
+
+    // Guarda la categoría en Firestore
+    private void saveCategoriaFirestore(String nombre, String iconRef) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("nombre", nombre);
+        data.put("icono", iconRef);
+
+        FirebaseFirestore.getInstance()
+                .collection("categorias")
+                .document(nombre)
+                .set(data)
+                .addOnSuccessListener(aVoid -> Toast.makeText(requireContext(),
+                        "Categoría guardada", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(requireContext(),
+                        "Error al guardar categoría", Toast.LENGTH_SHORT).show());
+    }
+
+    // Aplica el icono visualmente según si es URI o drawable name
+    private void setCategoryIcon(String iconRef) {
+        if (iconRef == null) return;
+        if (iconRef.startsWith("content://")) {
+            iconCategoriaPreview.setImageURI(Uri.parse(iconRef));
+        } else {
+            int resId = getResources().getIdentifier(iconRef, "drawable", requireContext().getPackageName());
+            if (resId != 0) iconCategoriaPreview.setImageResource(resId);
+        }
+    }
+
+
+
+    private void setDefaultCategoryIcon(int drawableRes) {
+        categoriaIconUri = null; // si se elige un ícono por defecto, no guardamos URI
+        iconCategoriaPreview.setImageResource(drawableRes);
+        iconCategoriaPreview.setTag(drawableRes); // guardamos referencia por si queremos recuperarla luego
+    }
+    private void pickIconFromGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        selectImageLauncher.launch(intent);
+    }
+
 
     // LÓGICA DE INICIO (Cuando cambia, la fecha/hora de fin DEBE sincronizarse)
 
@@ -690,27 +907,58 @@ public class AddFragment extends Fragment {
         }
     }
 
+    private String getPrioridadSeleccionada() {
+        Object sel = spinnerPrioridad.getSelectedItem();
+        String valor = sel != null ? sel.toString() : "Media";
+        // Normalizar
+        if (valor.equalsIgnoreCase("alta") || valor.equalsIgnoreCase("media") || valor.equalsIgnoreCase("baja")) {
+            return valor.toLowerCase();
+        }
+        return "media";
+    }
+
+    private String getCategoriaSeleccionada() {
+        String cat = editTextCategoria.getText() != null ? editTextCategoria.getText().toString().trim() : null;
+        return (cat != null && !cat.isEmpty()) ? cat : null;
+    }
+
     // NUEVO: Guardar en Firestore
     private void saveActividadFirestore() {
-        // reemplazar con EditText real del título si existe
-        String titulo = "Nueva actividad";
+        // Validar que el título no esté vacío
+        String titulo = editTextTitle.getText().toString().trim();
+        if (titulo.isEmpty()) {
+            Toast.makeText(requireContext(), "Por favor, ingresa un título para la actividad", Toast.LENGTH_SHORT).show();
+            editTextTitle.requestFocus();
+            return;
+        }
 
+        // Obtener la descripción (puede estar vacía)
+        String descripcion = editTextDescription.getText().toString().trim();
+        if (descripcion.isEmpty()) {
+            descripcion = null; // Firebase puede manejar null
+        }
+
+        // Crear los timestamps de inicio y fin
         Timestamp inicio = new Timestamp(startCalendar.getTime());
         Timestamp fin = new Timestamp(endCalendar.getTime());
 
+        // Construir el mapa de la actividad usando el servicio
         java.util.Map<String, Object> actividad = com.utp.project.data.FirestoreService.buildActividad(
                 titulo,
                 inicio,
                 fin,
-                null,           // descripcion
+                descripcion,
                 "pendiente",    // estado
-                null,           // categoria
+                getCategoriaSeleccionada(),           // categoria
+                categoriaIconUri != null ? categoriaIconUri.toString() : null,
                 selectedLocationAddress,
                 latitude != 0.0 ? latitude : null,
                 longitude != 0.0 ? longitude : null,
-                notificationMinutesBefore
+                notificationMinutesBefore,
+                getPrioridadSeleccionada()
         );
 
+        // Guardar en Firestore
         com.utp.project.data.FirestoreService.addActividad(actividad)
                 .addOnSuccessListener(ref -> {
                     Toast.makeText(requireContext(), "Actividad guardada", Toast.LENGTH_SHORT).show();
@@ -718,8 +966,9 @@ public class AddFragment extends Fragment {
                         getActivity().getSupportFragmentManager().popBackStack();
                     }
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(), "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                );
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                });
     }
 }

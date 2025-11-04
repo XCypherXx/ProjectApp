@@ -86,10 +86,12 @@ public class FirestoreService {
             @Nullable String descripcion,
             @Nullable String estado,
             @Nullable String categoria,
+            @Nullable String categoriaIcon,
             @Nullable String direccion,
             @Nullable Double lat,
             @Nullable Double lon,
-            int notificarMinAntes
+            int notificarMinAntes,
+            @Nullable String prioridad
     ) {
         Map<String, Object> a = new HashMap<>();
         a.put("titulo", titulo);
@@ -98,10 +100,12 @@ public class FirestoreService {
         if (descripcion != null) a.put("descripcion", descripcion);
         a.put("estado", estado != null ? estado : "pendiente");
         if (categoria != null) a.put("categoria", categoria);
+        if (categoriaIcon != null) a.put("categoriaIcon", categoriaIcon);
         if (direccion != null) a.put("direccion", direccion);
         if (lat != null) a.put("lat", lat);
         if (lon != null) a.put("lon", lon);
         a.put("notificarMinAntes", notificarMinAntes);
+        if (prioridad != null) a.put("prioridad", prioridad.toLowerCase());
         return a;
     }
 }

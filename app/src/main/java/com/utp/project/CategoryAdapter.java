@@ -34,11 +34,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Category c = categories.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {        Category c = categories.get(position);
 
         holder.categoryName.setText(c.getName());
         holder.categoryTasks.setText(c.getTaskCount() + " tareas");
+
+        int progress = c.getProgressPercent();
+        holder.categoryProgress.setText(progress + "%");
+
         holder.categoryIcon.setImageResource(c.getIconResId());
 
         holder.itemView.setOnClickListener(v -> {
@@ -57,13 +60,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView categoryIcon;
-        TextView categoryName, categoryTasks;
-
+        TextView categoryName, categoryTasks, categoryProgress;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             categoryIcon = itemView.findViewById(R.id.categoryIcon);
             categoryName = itemView.findViewById(R.id.categoryName);
             categoryTasks = itemView.findViewById(R.id.categoryTasks);
+            categoryProgress = itemView.findViewById(R.id.categoryProgress);
         }
     }
 }
