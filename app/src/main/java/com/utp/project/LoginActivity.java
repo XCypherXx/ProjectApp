@@ -21,6 +21,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider; // [FACEBOOK]
 import java.util.Arrays; // [FACEBOOK]
@@ -89,17 +90,38 @@ public class LoginActivity extends AppCompatActivity {
         btnFacebook = findViewById(R.id.btnFacebook);
 
         // Listener del botón Ingresar (Login FireBase)
+        // Listener del botón Ingresar (Login con email/password)
+        // Listener del botón Ingresar (Login con username -> busca email -> valida contraseña)
         buttonIngresar.setOnClickListener(v -> {
-            // Login anónimo en Firebase (para pruebas)
-            mAuth.signInAnonymously()
-                    .addOnSuccessListener(r -> {
-                        // Crea/merge doc de usuario
-                        com.utp.project.data.FirestoreService.ensureUserDocument(null)
-                                .addOnCompleteListener(x -> openHomeActivity());
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(LoginActivity.this, "Error autenticación anónima: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                    );
+            String input = editTextUsuario.getText().toString().trim();
+            String password = editTextPassword.getText().toString().trim();
+
+            if (input.isEmpty() || password.isEmpty()) {
+                Toast.makeText(LoginActivity.this, "Por favor ingrese usuario y contraseña", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Verificar si el input es un email o un username
+            boolean isEmail = android.util.Patterns.EMAIL_ADDRESS.matcher(input).matches();
+
+            if (isEmail) {
+                // Si es email, hacer login directo
+                loginWithEmail(input, password);
+            } else {
+                // Si es username, buscar email en SharedPreferences primero (más rápido)
+                // Si no está, intentar buscar en Firestore (solo si está autenticado)
+                SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                String savedEmail = prefs.getString("email", null);
+
+                if (savedEmail != null && prefs.getString("username", "").equals(input)) {
+                    // Si encontramos el email en SharedPreferences, usarlo
+                    loginWithEmail(savedEmail, password);
+                } else {
+                    // Si no está en SharedPreferences, intentar Firestore
+                    // SOLO funciona si hay sesión activa, si no, mostrar error
+                    Toast.makeText(LoginActivity.this, "Por favor ingrese su correo electrónico para iniciar sesión", Toast.LENGTH_LONG).show();
+                }
+            }
         });
 
         // [GOOGLE] Listener para botón de Google
@@ -127,6 +149,30 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(LoginActivity.this, "Error de Facebook: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    // Metodo auxiliar para login con email
+    private void loginWithEmail(String email, String password) {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    Toast.makeText(this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
+                    com.utp.project.data.FirestoreService.ensureUserDocument(null)
+                            .addOnCompleteListener(x -> openHomeActivity());
+                })
+                .addOnFailureListener(e -> {
+                    String errorMessage = "Error al iniciar sesión";
+                    if (e.getMessage() != null) {
+                        if (e.getMessage().contains("There is no user record")) {
+                            errorMessage = "Usuario o correo no encontrado";
+                        } else if (e.getMessage().contains("The password is invalid") ||
+                                e.getMessage().contains("wrong-password")) {
+                            errorMessage = "Contraseña incorrecta";
+                        } else {
+                            errorMessage = e.getMessage();
+                        }
+                    }
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                });
     }
 
     // MANEJO DE RESULTADOS DE ACTIVIDAD (Google y Facebook)

@@ -47,7 +47,7 @@ public class ActivityRegistro extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
 
     // Declaración de variables
-    private EditText editTextUsuario, editTextPassword, editTextConfirmPassword;
+    private EditText editTextUsuario, editTextPassword, editTextConfirmPassword, editTextCorreo;
     private MaterialButton btnRegistrarse;
     private CheckBox cbAceptarTerminos;
 
@@ -79,6 +79,7 @@ public class ActivityRegistro extends AppCompatActivity {
         editTextPassword = findViewById(R.id.editText_password);
         editTextConfirmPassword = findViewById(R.id.editText_confirmPassword);
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
+        editTextCorreo = findViewById(R.id.editText_correo);
 
         // Referencias a los TextInputLayout para manejo de errores
         textInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
@@ -89,14 +90,22 @@ public class ActivityRegistro extends AppCompatActivity {
 
         btnRegistrarse.setOnClickListener(v -> {
             String username = editTextUsuario.getText().toString().trim();
+            String email = editTextCorreo.getText().toString().trim(); // Capturar EMAIL
             String password = editTextPassword.getText().toString().trim();
             String confirmPassword = editTextConfirmPassword.getText().toString().trim();
 
             textInputLayoutPassword.setError(null);
             textInputLayoutConfirmPassword.setError(null);
 
-            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            // Validar que todos los campos estén llenos
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Validar formato de email
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(this, "Por favor ingrese un correo electrónico válido", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -105,41 +114,67 @@ public class ActivityRegistro extends AppCompatActivity {
                 return;
             }
 
-            // Guardar nombre en SharedPreferences para mostrar en Home
-            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-            prefs.edit()
-                    .putString("username", username)
-                    .putString("password", password)
-                    .putString("currentUser", username)
-                    .apply();
+            // Validar longitud mínima de contraseña (Firebase requiere mínimo 6 caracteres)
+            if (password.length() < 6) {
+                textInputLayoutPassword.setError("La contraseña debe tener al menos 6 caracteres");
+                return;
+            }
 
-            // NUEVO: Autenticación anónima en Firebase y luego actualizar nombre
-            mAuth.signInAnonymously()
+            // CAMBIO PRINCIPAL: Usar EMAIL para crear cuenta en Firebase Authentication
+            // Firebase Authentication requiere EMAIL como identificador, no username
+            mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
-                        // Actualizar displayName del usuario
-                        com.google.firebase.auth.UserProfileChangeRequest req =
+                        FirebaseUser user = mAuth.getCurrentUser();
+
+                        // Guardar información en SharedPreferences
+                        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                        prefs.edit()
+                                .putString("username", username) // Guardar username para mostrar
+                                .putString("email", email) // Guardar email también
+                                .putString("currentUser", username)
+                                .apply(); // NO guardar contraseña (seguridad)
+
+                        // Actualizar displayName con el username
+                        com.google.firebase.auth.UserProfileChangeRequest profileUpdates =
                                 new com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                        .setDisplayName(username)
+                                        .setDisplayName(username) // Usar username como nombre a mostrar
                                         .build();
-                        mAuth.getCurrentUser().updateProfile(req)
+                        user.updateProfile(profileUpdates)
                                 .addOnCompleteListener(task -> {
-                                    // Guardar en Firestore con nombre en perfil
+                                    // Guardar información en Firestore
+                                    // IMPORTANTE: Guardar username y email para poder buscar por username en el login
                                     java.util.Map<String, Object> extra = new java.util.HashMap<>();
                                     java.util.Map<String, Object> perfil = new java.util.HashMap<>();
-                                    perfil.put("nombre", username);
+                                    perfil.put("nombre", username); // Nombre de usuario
+                                    perfil.put("username", username); // Username para búsqueda
+                                    perfil.put("email", email); // Email asociado al username
                                     extra.put("perfil", perfil);
 
                                     com.utp.project.data.FirestoreService.ensureUserDocument(extra)
                                             .addOnSuccessListener(aVoid -> {
                                                 Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                                                // Abrir onboarding (ya sabemos que es primera vez)
-                                                openNextScreen(mAuth.getCurrentUser().getUid());
+                                                openNextScreen(user.getUid());
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Toast.makeText(this, "Error al guardar datos: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                             });
                                 });
                     })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this, "Error al registrarse: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                    );
+                    .addOnFailureListener(e -> {
+                        String errorMessage = "Error al registrarse";
+                        if (e.getMessage() != null) {
+                            if (e.getMessage().contains("The email address is already in use")) {
+                                errorMessage = "Este correo electrónico ya está registrado";
+                            } else if (e.getMessage().contains("The email address is badly formatted")) {
+                                errorMessage = "Correo electrónico inválido";
+                            } else if (e.getMessage().contains("The given password is invalid")) {
+                                errorMessage = "La contraseña no es válida (mínimo 6 caracteres)";
+                            } else {
+                                errorMessage = e.getMessage();
+                            }
+                        }
+                        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                    });
         });
 
         // Deshabilitar el botón de registro por defecto
