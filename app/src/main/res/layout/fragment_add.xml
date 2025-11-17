@@ -290,12 +290,15 @@
                 android:textStyle="bold"
                 android:textColor="@color/md_theme_secondaryContainer" />
 
-            <Spinner
-                android:id="@+id/spinner_prioridad"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/text_prioridad_valor"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="40dp" />
+                android:layout_marginStart="200dp"
+                android:textSize="17sp"
+                android:text="Baja"
+                android:textColor="@color/md_theme_secondaryContainer"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <View

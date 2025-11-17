@@ -1,7 +1,8 @@
 package com.utp.project;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import android.content.DialogInterface;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -68,12 +69,15 @@ public class AddFragment extends Fragment {
     // VISTAS DE TÍTULO Y DESCRIPCIÓN
     private EditText editTextTitle;
     private EditText editTextDescription;
-    private Spinner spinnerPrioridad;
     private EditText editTextCategoria;
     private android.widget.ImageView iconCategoriaPreview;
     private android.net.Uri categoriaIconUri;
     private ActivityResultLauncher<Intent> selectImageLauncher;
-
+    // PRIORIDAD
+    private LinearLayout layoutPrioridad;
+    private TextView textPrioridadValor;
+    private String selectedPriority = "Media"; // Valor por defecto
+    private final String[] priorityOptions = {"Alta", "Media", "Baja"};
     private Calendar startCalendar;
     private Calendar endCalendar;
     private long timeDeltaMillis = 3600000; // 1 hora por defecto (3600 * 1000)
@@ -131,9 +135,13 @@ public class AddFragment extends Fragment {
         // VISTAS DE TÍTULO Y DESCRIPCIÓN
         editTextTitle = view.findViewById(R.id.edit_text_title);
         editTextDescription = view.findViewById(R.id.edit_text_description);
-        spinnerPrioridad = view.findViewById(R.id.spinner_prioridad);
         editTextCategoria = view.findViewById(R.id.edit_text_categoria);
         iconCategoriaPreview = view.findViewById(R.id.icon_categoria_preview);
+
+        // --- INICIO MODIFICACIÓN PRIORIDAD ---
+        layoutPrioridad = view.findViewById(R.id.layout_prioridad);
+        textPrioridadValor = view.findViewById(R.id.text_prioridad_valor);
+        textPrioridadValor.setText(selectedPriority); // Mostrar valor por defecto
 
         // Lanzador para elegir imagen del icono de categoría
         selectImageLauncher = registerForActivityResult(
@@ -149,11 +157,7 @@ public class AddFragment extends Fragment {
                 }
         );
 
-        // Configurar opciones del spinner de prioridad
-        ArrayAdapter<String> prioridadAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item,
-                new String[]{"Alta", "Media", "Baja"});
-        prioridadAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPrioridad.setAdapter(prioridadAdapter);
+
 
         startCalendar = Calendar.getInstance();
         endCalendar = (Calendar) startCalendar.clone(); // Iniciar con la misma fecha/hora
@@ -181,6 +185,9 @@ public class AddFragment extends Fragment {
 
         // NUEVO: Listener para Agregar Personas
         layoutAgregarPersonas.setOnClickListener(v -> checkContactPermissionAndLaunchPicker());
+        // --- INICIO MODIFICACIÓN PRIORIDAD ---
+        // Asignar el listener al LinearLayout
+        layoutPrioridad.setOnClickListener(v -> showPriorityDialog());
 
         // --- CATEGORÍA --- //
         editTextCategoria.setFocusable(false);
@@ -208,6 +215,36 @@ public class AddFragment extends Fragment {
 
         return view;
 
+    }
+
+    // INICIO MODIFICACIÓN PRIORIDAD (Nuevo metodo)
+
+    private void showPriorityDialog() {
+        // Encontrar el índice del item actualmente seleccionado
+        int checkedItem = -1;
+        for (int i = 0; i < priorityOptions.length; i++) {
+            if (priorityOptions[i].equals(selectedPriority)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Seleccionar Prioridad");
+
+        // Configura el diálogo con las opciones y el ítem chequeado
+        builder.setSingleChoiceItems(priorityOptions, checkedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 'which' es el índice del elemento seleccionado (0="Alta", 1="Media", 2="Baja")
+                selectedPriority = priorityOptions[which]; // Actualiza la variable
+                textPrioridadValor.setText(selectedPriority); // Actualiza la UI
+                dialog.dismiss(); // Cierra el diálogo
+            }
+        });
+
+        builder.setNegativeButton("Cancelar", null); // Botón para cerrar sin cambiar
+        builder.show();
     }
 
     private void showIconSelectionDialog() {
@@ -908,9 +945,8 @@ public class AddFragment extends Fragment {
     }
 
     private String getPrioridadSeleccionada() {
-        Object sel = spinnerPrioridad.getSelectedItem();
-        String valor = sel != null ? sel.toString() : "Media";
-        // Normalizar
+        String valor = selectedPriority; // USAR LA VARIABLE
+
         if (valor.equalsIgnoreCase("alta") || valor.equalsIgnoreCase("media") || valor.equalsIgnoreCase("baja")) {
             return valor.toLowerCase();
         }
