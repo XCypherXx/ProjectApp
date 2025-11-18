@@ -78,6 +78,7 @@ public class AddFragment extends Fragment {
     private TextView textPrioridadValor;
     private String selectedPriority = "Media"; // Valor por defecto
     private final String[] priorityOptions = {"Alta", "Media", "Baja"};
+    private View btnGuardar;
     private Calendar startCalendar;
     private Calendar endCalendar;
     private long timeDeltaMillis = 3600000; // 1 hora por defecto (3600 * 1000)
@@ -95,9 +96,6 @@ public class AddFragment extends Fragment {
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private ActivityResultLauncher<Intent> selectContactLauncher;
     private String selectedCategoryIconRef = null; // guarda el ícono de la categoría elegida o creada
-
-    public AddFragment() {
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -137,6 +135,9 @@ public class AddFragment extends Fragment {
         editTextDescription = view.findViewById(R.id.edit_text_description);
         editTextCategoria = view.findViewById(R.id.edit_text_categoria);
         iconCategoriaPreview = view.findViewById(R.id.icon_categoria_preview);
+
+        // Enlazamos el botón a la variable de clase
+        btnGuardar = view.findViewById(R.id.btn_guardar);
 
         // --- INICIO MODIFICACIÓN PRIORIDAD ---
         layoutPrioridad = view.findViewById(R.id.layout_prioridad);
@@ -960,33 +961,45 @@ public class AddFragment extends Fragment {
 
     // NUEVO: Guardar en Firestore
     private void saveActividadFirestore() {
-        // Validar que el título no esté vacío
+        // 1. DESHABILITAR BOTÓN INMEDIATAMENTE
+        if (btnGuardar != null) {
+            btnGuardar.setEnabled(false);
+        }
+
         String titulo = editTextTitle.getText().toString().trim();
         if (titulo.isEmpty()) {
-            Toast.makeText(requireContext(), "Por favor, ingresa un título para la actividad", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Por favor, ingresa un título", Toast.LENGTH_SHORT).show();
             editTextTitle.requestFocus();
+
+            // REACTIVAR si hay error de validación
+            if (btnGuardar != null) btnGuardar.setEnabled(true);
             return;
         }
 
-        // Obtener la descripción (puede estar vacía)
         String descripcion = editTextDescription.getText().toString().trim();
         if (descripcion.isEmpty()) {
-            descripcion = null; // Firebase puede manejar null
+            descripcion = null;
         }
 
-        // Crear los timestamps de inicio y fin
+        // Validación de fechas
+        if (endCalendar.before(startCalendar)) {
+            validateEndTime();
+            // REACTIVAR si hay error de validación
+            if (btnGuardar != null) btnGuardar.setEnabled(true);
+            return;
+        }
+
         Timestamp inicio = new Timestamp(startCalendar.getTime());
         Timestamp fin = new Timestamp(endCalendar.getTime());
 
-        // Construir el mapa de la actividad usando el servicio
         java.util.Map<String, Object> actividad = com.utp.project.data.FirestoreService.buildActividad(
                 titulo,
                 inicio,
                 fin,
                 descripcion,
-                "pendiente",    // estado
-                getCategoriaSeleccionada(),           // categoria
-                categoriaIconUri != null ? categoriaIconUri.toString() : null,
+                "pendiente",
+                getCategoriaSeleccionada(),
+                categoriaIconUri != null ? categoriaIconUri.toString() : selectedCategoryIconRef,
                 selectedLocationAddress,
                 latitude != 0.0 ? latitude : null,
                 longitude != 0.0 ? longitude : null,
@@ -994,10 +1007,10 @@ public class AddFragment extends Fragment {
                 getPrioridadSeleccionada()
         );
 
-        // Guardar en Firestore
         com.utp.project.data.FirestoreService.addActividad(actividad)
                 .addOnSuccessListener(ref -> {
                     Toast.makeText(requireContext(), "Actividad guardada", Toast.LENGTH_SHORT).show();
+                    // ÉXITO: No reactivamos el botón porque cerramos la pantalla
                     if (getActivity() != null) {
                         getActivity().getSupportFragmentManager().popBackStack();
                     }
@@ -1005,6 +1018,11 @@ public class AddFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     Toast.makeText(requireContext(), "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     e.printStackTrace();
+
+                    // ERROR: REACTIVAR el botón para que el usuario pueda intentar de nuevo
+                    if (btnGuardar != null) {
+                        btnGuardar.setEnabled(true);
+                    }
                 });
+        }
     }
-}
