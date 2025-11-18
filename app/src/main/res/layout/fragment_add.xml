@@ -318,78 +318,25 @@
             android:background="@android:color/transparent">
 
             <ImageView
-                android:id="@+id/icon_color_marker"
-                android:layout_width="27dp"
-                android:layout_height="27dp"
-                android:src="@drawable/ic_color"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:tint="@color/md_theme_onTertiary"
-                tools:ignore="UseAppTint" />
+                android:id="@+id/icon_categoria_preview"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_work"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Vista previa del ícono"
+                android:padding="4dp" />
 
             <!-- Campo para mostrar la categoría seleccionada -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
-                app:hintEnabled="false"
-                app:boxBackgroundMode="none">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_text_categoria"
-                    android:layout_width="match_parent"
-                    android:layout_height="46dp"
-                    android:background="@android:color/transparent"
-                    android:clickable="true"
-                    android:focusable="false"
-                    android:hint="categoria"
-                    android:inputType="none"
-                    android:maxLength="50"
-                    android:maxLines="1"
-                    android:textColor="@color/md_theme_secondaryContainer"
-                    android:textColorHint="@color/md_theme_secondaryContainer"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Contenedor de vista previa del ícono + botón -->
-            <LinearLayout
+            <TextView
+                android:id="@+id/edit_text_categoria"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginEnd="15dp">
-
-                <ImageView
-                    android:id="@+id/icon_categoria_preview"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:layout_marginEnd="8dp"
-                    android:src="@drawable/ic_work"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Vista previa del ícono"
-                    android:padding="4dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_elegir_categoria"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="selecionar"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:textColor="@color/md_theme_onTertiaryContainer"
-                    android:backgroundTint="@color/md_theme_tertiaryContainer"
-                    app:cornerRadius="20dp"
-
-                    app:iconGravity="textStart"
-                    app:iconPadding="8dp"
-                    app:iconTint="@color/md_theme_onTertiaryContainer"/>
-            </LinearLayout>
+                android:text="Categoría"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_secondaryContainer" />
         </LinearLayout>
 
         <View
@@ -537,41 +484,6 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="40dp"
                 android:text="Agregar notificación"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/md_theme_secondaryContainer" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="5dp"
-            android:background="@color/md_theme_onSecondaryContainer"/>
-
-        <LinearLayout
-            android:id="@+id/layout_color"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingVertical="7dp"
-            android:background="@android:color/transparent"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:layout_width="27dp"
-                android:layout_height="27dp"
-                android:src="@drawable/ic_color"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="40dp"
-                android:text="Elegir color"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/md_theme_secondaryContainer" />

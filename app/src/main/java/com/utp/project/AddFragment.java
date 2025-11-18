@@ -69,7 +69,7 @@ public class AddFragment extends Fragment {
     // VISTAS DE TÍTULO Y DESCRIPCIÓN
     private EditText editTextTitle;
     private EditText editTextDescription;
-    private EditText editTextCategoria;
+    private TextView editTextCategoria;
     private android.widget.ImageView iconCategoriaPreview;
     private android.net.Uri categoriaIconUri;
     private ActivityResultLauncher<Intent> selectImageLauncher;
@@ -194,7 +194,7 @@ public class AddFragment extends Fragment {
         editTextCategoria.setClickable(true);
         editTextCategoria.setOnClickListener(v -> showCategoryPickerDialog());
 
-        View btnElegirCategoria = view.findViewById(R.id.btn_elegir_categoria);
+        View btnElegirCategoria = view.findViewById(R.id.layout_categoria);
         if (btnElegirCategoria != null) {
             btnElegirCategoria.setOnClickListener(v -> showCategoryPickerDialog());
         }
