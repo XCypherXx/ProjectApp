@@ -279,7 +279,7 @@ public class AddFragment extends Fragment {
         builder.show();
     }
 
-    // === NUEVO MÉTODO ===
+    // === NUEVO METODO ===
 // Muestra todas las categorías guardadas en Firestore y permite crear una nueva
     private void showCategoryPickerDialog() {
         FirebaseFirestore.getInstance()
@@ -1012,7 +1012,10 @@ public class AddFragment extends Fragment {
                     Toast.makeText(requireContext(), "Actividad guardada", Toast.LENGTH_SHORT).show();
                     // ÉXITO: No reactivamos el botón porque cerramos la pantalla
                     if (getActivity() != null) {
-                        getActivity().getSupportFragmentManager().popBackStack();
+                        getActivity().getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.frame_layout, new HomeFragment()) // Reemplaza con HomeFragment
+                                // .addToBackStack(null) // No añadimos al backstack para que 'atrás' salga de la app o vaya al login
+                                .commit();
                     }
                 })
                 .addOnFailureListener(e -> {
