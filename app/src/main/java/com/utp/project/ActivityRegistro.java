@@ -47,7 +47,7 @@ public class ActivityRegistro extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
 
     // Declaración de variables
-    private EditText editTextUsuario, editTextPassword, editTextConfirmPassword, editTextCorreo;
+    private EditText editTextUsuario, editTextPassword, editTextConfirmPassword, editTextCorreo, editTextNumero;
     private MaterialButton btnRegistrarse;
     private CheckBox cbAceptarTerminos;
 
@@ -80,6 +80,7 @@ public class ActivityRegistro extends AppCompatActivity {
         editTextConfirmPassword = findViewById(R.id.editText_confirmPassword);
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
         editTextCorreo = findViewById(R.id.editText_correo);
+        editTextNumero = findViewById(R.id.editText_numero);
 
         // Referencias a los TextInputLayout para manejo de errores
         textInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
@@ -93,6 +94,11 @@ public class ActivityRegistro extends AppCompatActivity {
             String email = editTextCorreo.getText().toString().trim(); // Capturar EMAIL
             String password = editTextPassword.getText().toString().trim();
             String confirmPassword = editTextConfirmPassword.getText().toString().trim();
+
+            String telefono = "";
+            if (editTextNumero != null) {
+                telefono = editTextNumero.getText().toString().trim();
+            }
 
             textInputLayoutPassword.setError(null);
             textInputLayoutConfirmPassword.setError(null);
@@ -119,6 +125,8 @@ public class ActivityRegistro extends AppCompatActivity {
                 textInputLayoutPassword.setError("La contraseña debe tener al menos 6 caracteres");
                 return;
             }
+
+            final String finalTelefono = telefono;
 
             // CAMBIO PRINCIPAL: Usar EMAIL para crear cuenta en Firebase Authentication
             // Firebase Authentication requiere EMAIL como identificador, no username
@@ -148,6 +156,7 @@ public class ActivityRegistro extends AppCompatActivity {
                                     perfil.put("nombre", username); // Nombre de usuario
                                     perfil.put("username", username); // Username para búsqueda
                                     perfil.put("email", email); // Email asociado al username
+                                    perfil.put("telefono", finalTelefono);
                                     extra.put("perfil", perfil);
 
                                     com.utp.project.data.FirestoreService.ensureUserDocument(extra)

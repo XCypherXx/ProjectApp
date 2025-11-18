@@ -161,6 +161,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_numero"
             android:drawableStart="@drawable/baseline_person_24"
             android:layout_width="match_parent"
             android:layout_height="50dp"
