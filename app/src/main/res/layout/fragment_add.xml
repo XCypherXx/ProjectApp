@@ -147,16 +147,12 @@
                 android:textStyle="bold"
                 android:textColor="@color/md_theme_secondaryContainer" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_all_day"
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_notifications"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="35dp"
-                android:checked="false"
-                android:scaleY="1.5"
-                android:scaleX="1.5"
-                app:thumbTint="@color/md_theme_surfaceVariant"
-                app:trackTint="@color/md_theme_outlineVariant"/>
+                android:layout_marginEnd="30dp"
+                android:checked="false"/>
         </LinearLayout>
 
         <!-- SECCIÓN: Fecha (Día, Mes, Año) -->
