@@ -259,11 +259,12 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
         planesTerminadosList = new ArrayList<>();
 
         // Configurar el LayoutManager y el Adaptador
+        // CAMBIO: Usar item_plan_proximo.xml en lugar de item_plan_terminado.xml
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         planesTerminadosAdapter = new PlanAdapter(
                 getContext(),
                 planesTerminadosList,
-                R.layout.item_plan_terminado,
+                R.layout.item_plan_terminado,  // CAMBIO: Usar el mismo layout que próximos planes
                 (actividadId, completed) -> {
                     if (actividadId == null) return;
                     java.util.Map<String, Object> campos = new java.util.HashMap<>();
@@ -285,7 +286,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
             }
 
             if (snap == null || snap.isEmpty()) {
-                // Limpiar_todo
+                // Limpiar todo
                 proximosPlanesList.clear();
                 planesTerminadosList.clear();
                 clearCurrentPlanUI();
@@ -294,44 +295,114 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
                 return;
             }
 
-            // Obtener la fecha de hoy para filtrar
-            Calendar today = Calendar.getInstance();
-            today.set(Calendar.HOUR_OF_DAY, 0);
-            today.set(Calendar.MINUTE, 0);
-            today.set(Calendar.SECOND, 0);
-            today.set(Calendar.MILLISECOND, 0);
-
-            Calendar tomorrow = (Calendar) today.clone();
-            tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+            // Obtener la fecha y hora actual
+            Calendar now = Calendar.getInstance();
 
             // Limpiar las listas
             proximosPlanesList.clear();
             planesTerminadosList.clear();
 
             PlanModel planEnCurso = null;
+            String descripcionEnCurso = null;
+            String horaInicioFinEnCurso = null;
+            String tituloEnCurso = null;
+
             // Procesar cada documento
             for (DocumentSnapshot doc : snap.getDocuments()) {
-                PlanModel plan = convertDocumentToPlanModel(doc);
-                if (plan == null) continue;
-
                 Timestamp fechaInicio = doc.getTimestamp("fechaInicio");
+                Timestamp fechaFin = doc.getTimestamp("fechaFin");
                 String estado = doc.getString("estado");
 
-                if (fechaInicio != null) {
-                    Calendar fechaInicioCal = Calendar.getInstance();
-                    fechaInicioCal.setTimeInMillis(fechaInicio.toDate().getTime());
+                if (fechaInicio == null) continue;
 
-                    // Verificar si la actividad es de hoy
-                    boolean isToday = fechaInicioCal.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-                            fechaInicioCal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR);
-                   // boolean isFuture = fechaInicioCal.getTimeInMillis() >= tomorrow.getTimeInMillis();
-                    boolean isFuture = fechaInicioCal.after(today);
-                    if (estado != null && estado.equals("completado")) {
+                Calendar fechaInicioCal = Calendar.getInstance();
+                fechaInicioCal.setTimeInMillis(fechaInicio.toDate().getTime());
+
+                Calendar fechaFinCal = null;
+                if (fechaFin != null) {
+                    fechaFinCal = Calendar.getInstance();
+                    fechaFinCal.setTimeInMillis(fechaFin.toDate().getTime());
+                }
+
+                // PRIORIDAD: Verificar si está en curso (hora actual entre inicio y fin)
+                // Si la hora actual está dentro del rango, pasa inmediatamente a "plan en curso"
+                boolean isEnCurso = false;
+                if (fechaFinCal != null) {
+                    // Verificar si la hora actual está entre inicio y fin (inclusive)
+                    isEnCurso = (now.after(fechaInicioCal) || now.equals(fechaInicioCal))
+                            && (now.before(fechaFinCal) || now.equals(fechaFinCal));
+                } else {
+                    // Si no hay fecha fin, verificar si ya pasó la fecha de inicio
+                    isEnCurso = now.after(fechaInicioCal) || now.equals(fechaInicioCal);
+                }
+
+                // MODIFICACIÓN: Verificar si la actividad ya terminó
+                boolean isTerminado = false;
+                if (fechaFinCal != null) {
+                    // Si ya pasó la hora de fin, está terminado
+                    isTerminado = now.after(fechaFinCal);
+                } else {
+                    // Si no hay fecha fin, considerar terminado si pasó mucho tiempo desde inicio
+                    Calendar fechaInicioMas1Hora = (Calendar) fechaInicioCal.clone();
+                    fechaInicioMas1Hora.add(Calendar.HOUR_OF_DAY, 1);
+                    isTerminado = now.after(fechaInicioMas1Hora);
+                }
+
+                // NUEVO: Si la actividad terminó y no está marcada como completada, actualizarla automáticamente
+                if (isTerminado && (estado == null || !estado.equals("completado"))) {
+                    String actividadId = doc.getId();
+                    java.util.Map<String, Object> campos = new java.util.HashMap<>();
+                    campos.put("estado", "completado");
+                    // Actualizar en Firestore de forma asíncrona
+                    com.utp.project.data.FirestoreService.updateActividad(actividadId, campos)
+                            .addOnSuccessListener(aVoid -> {
+                                // Actualización exitosa, el listener se disparará de nuevo y actualizará la UI
+                            })
+                            .addOnFailureListener(error -> {
+                                // Error al actualizar, pero continuamos con el flujo normal
+                                android.util.Log.e("CalendarFragment", "Error al marcar actividad como completada: " + e.getMessage());
+                            });
+                    // Actualizar el estado localmente para que se refleje inmediatamente
+                    estado = "completado";
+                }
+
+                PlanModel plan = convertDocumentToPlanModel(doc, estado); // Pasar el estado actualizado
+                if (plan == null) continue;
+
+                // Clasificar la actividad: PRIORIDAD para "en curso"
+                if (isEnCurso) {
+                    // Plan en curso: desaparece de "próximo plan" y se traslada aquí
+                    // Solo uno puede estar en curso (tomar el primero que cumpla la condición)
+                    if (planEnCurso == null) {
+                        planEnCurso = plan;
+                        tituloEnCurso = doc.getString("titulo");
+                        if (tituloEnCurso == null || tituloEnCurso.isEmpty()) {
+                            tituloEnCurso = "Sin título";
+                        }
+                        descripcionEnCurso = doc.getString("descripcion");
+                        if (descripcionEnCurso == null || descripcionEnCurso.isEmpty()) {
+                            descripcionEnCurso = "Sin descripción";
+                        }
+                        // Formatear hora inicio-fin
+                        if (fechaInicio != null && fechaFin != null) {
+                            horaInicioFinEnCurso = formatTimeRange(fechaInicio.toDate(), fechaFin.toDate());
+                        } else if (fechaInicio != null) {
+                            horaInicioFinEnCurso = formatTime(fechaInicio.toDate());
+                        }
+                    }
+                    // IMPORTANTE: No agregar a ninguna lista (ni próximos ni terminados)
+                    // porque está en curso
+                } else {
+                    // Si NO está en curso, verificar si ya terminó o está pendiente
+                    // Verificar si está completado manualmente o automáticamente
+                    boolean isCompletado = (estado != null && estado.equals("completado"));
+
+                    if (isCompletado || isTerminado) {
+                        // Plan terminado (usará item_plan_terminado.xml con color rojo)
+                        // Si terminó, el checkbox ya está marcado automáticamente
                         planesTerminadosList.add(plan);
-                    } else if (isToday) {
-                        // Solo debe haber uno "en curso" hoy
-                        if (planEnCurso == null) planEnCurso = plan;
-                    } else if (isFuture) {
+                    } else {
+                        // Próximo plan (aún no inicia, no está en curso)
                         proximosPlanesList.add(plan);
                     }
                 }
@@ -339,12 +410,16 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
 
             // Ordenar Próximos planes por fecha de inicio (ascendente)
             proximosPlanesList.sort((a, b) -> Long.compare(a.getStartTimeMs(), b.getStartTimeMs()));
+
+            // Ordenar Planes terminados por fecha de inicio (descendente - más recientes primero)
+            planesTerminadosList.sort((a, b) -> Long.compare(b.getStartTimeMs(), a.getStartTimeMs()));
+
             proximosPlanesAdapter.notifyDataSetChanged();
             planesTerminadosAdapter.notifyDataSetChanged();
 
             // Mostrar plan en curso (si existe)
             if (planEnCurso != null) {
-                updateCurrentPlanUI(planEnCurso);
+                updateCurrentPlanUI(planEnCurso, tituloEnCurso, descripcionEnCurso, horaInicioFinEnCurso);
             } else {
                 clearCurrentPlanUI();
             }
@@ -355,7 +430,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
     /**
      * Muestra el plan actual en la tarjeta de "Plan en curso"
      */
-    private void updateCurrentPlanUI(PlanModel plan) {
+    private void updateCurrentPlanUI(PlanModel plan, String titulo, String descripcion, String horaInicioFin) {
         View view = getView();
         if (view == null) return;
 
@@ -364,19 +439,28 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
         TextView details = view.findViewById(R.id.text_current_plan_details);
         LinearProgressIndicator progress = view.findViewById(R.id.progress_current_plan);
 
-        // Mostrar solo la hora final del rango (si existe)
-        String horaFinal;
-        String[] partes = plan.getTimeRange().split("-");
-        if (partes.length > 1) {
-            horaFinal = partes[1].trim(); // ejemplo: "10:00 AM"
+        // Mostrar hora inicio-fin en text_current_plan_time
+        if (horaInicioFin != null && !horaInicioFin.isEmpty()) {
+            time.setText(horaInicioFin);
         } else {
-            horaFinal = plan.getTimeRange(); // fallback si no hay "-"
+            time.setText("--:--");
         }
 
-        time.setText(horaFinal);
-        title.setText("Siguiente actividad: " + plan.getTitle());
-        details.setText("Plan pendiente para hoy");
+        // Mostrar título en text_current_plan_title
+        if (titulo != null && !titulo.isEmpty()) {
+            title.setText(titulo);
+        } else {
+            title.setText(plan.getTitle()); // Fallback al título del plan
+        }
 
+        // Mostrar descripción en text_current_plan_details
+        if (descripcion != null && !descripcion.isEmpty()) {
+            details.setText(descripcion);
+        } else {
+            details.setText("Sin descripción");
+        }
+
+        // Calcular progreso basado en el tiempo transcurrido
         progress.setProgress(0, true);
     }
 
@@ -402,7 +486,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
     /**
      * Convierte un DocumentSnapshot de Firestore a un PlanModel
      */
-    private PlanModel convertDocumentToPlanModel(DocumentSnapshot doc) {
+    private PlanModel convertDocumentToPlanModel(DocumentSnapshot doc, String estadoActualizado) {
         try {
             String id = doc.getId();
             String titulo = doc.getString("titulo");
@@ -421,8 +505,8 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
                 timeRange = formatTime(fechaInicio.toDate());
             }
 
-            // Determinar el color según el estado
-            String estado = doc.getString("estado");
+            // Determinar el color según el estado (usar estadoActualizado si está disponible)
+            String estado = estadoActualizado != null ? estadoActualizado : doc.getString("estado");
             int colorBar;
             int colorBackground;
 
@@ -443,6 +527,11 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
             e.printStackTrace();
             return null;
         }
+    }
+
+    // Mantener el método original para compatibilidad
+    private PlanModel convertDocumentToPlanModel(DocumentSnapshot doc) {
+        return convertDocumentToPlanModel(doc, null);
     }
 
     /**
