@@ -52,6 +52,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
     private List<PlanModel> proximosPlanesList;
     private List<PlanModel> planesTerminadosList;
     private ListenerRegistration actividadesListener;
+    private LocalDate selectedDate = LocalDate.now();
 
     @Nullable
     @Override
@@ -115,20 +116,41 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
         calendarAdapter = new CalendarAdapter(getContext(), allDates, this);
         calendarRecyclerView.setAdapter(calendarAdapter);
 
-        // 3. Desplazar al día de hoy (que está en la posición PRELOAD_DAYS)
+        // 3. MEJORADO: Desplazar al día de hoy y centrarlo en el medio del contenedor
         // Usamos post() para asegurar que el RecyclerView ya haya sido medido.
         calendarRecyclerView.post(() -> {
-            if (calendarRecyclerView.getChildCount() > 0) {
-                // Cálculo para centrar el día actual en la vista de 5 días
-                int itemWidth = calendarRecyclerView.getChildAt(0).getWidth();
-                int offset = (calendarRecyclerView.getWidth() / 2) - (itemWidth / 2);
-                layoutManager.scrollToPositionWithOffset(PRELOAD_DAYS, offset);
+            int todayPosition = PRELOAD_DAYS; // La posición del día de hoy
+            if (todayPosition < allDates.size()) {
+                // Obtener el ancho del RecyclerView
+                int recyclerWidth = calendarRecyclerView.getWidth();
+                // Obtener el ancho de un item (asumiendo que todos tienen el mismo ancho)
+                View firstChild = layoutManager.findViewByPosition(0);
+                if (firstChild != null) {
+                    int itemWidth = firstChild.getWidth();
+                    // Calcular el offset para centrar el día de hoy
+                    int offset = (recyclerWidth / 2) - (itemWidth / 2);
+                    layoutManager.scrollToPositionWithOffset(todayPosition, offset);
+                } else {
+                    // Si no hay vista visible, usar un delay para esperar a que se renderice
+                    calendarRecyclerView.postDelayed(() -> {
+                        View child = layoutManager.findViewByPosition(todayPosition);
+                        if (child != null) {
+                            int itemWidth = child.getWidth();
+                            // Reutilizar recyclerWidth del scope externo o recalcular
+                            int recyclerWidthDelayed = calendarRecyclerView.getWidth();
+                            int offset = (recyclerWidthDelayed / 2) - (itemWidth / 2);
+                            layoutManager.scrollToPositionWithOffset(todayPosition, offset);
+                        } else {
+                            // Fallback: simplemente desplazar a la posición
+                            layoutManager.scrollToPosition(todayPosition);
+                        }
+                    }, 100);
+                }
             } else {
                 // Fallback
-                layoutManager.scrollToPosition(PRELOAD_DAYS);
+                layoutManager.scrollToPosition(todayPosition);
             }
         });
-
 
         // 4. Implementar la lógica de carga continua (scroll infinito)
         setupContinuousScroll();
@@ -226,8 +248,29 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
      */
     @Override
     public void onDateSelected(LocalDate date) {
-        // Muestra un mensaje temporal con la fecha seleccionada
-        Toast.makeText(getContext(), "Cargando actividades para: " + date, Toast.LENGTH_SHORT).show();
+        // Actualizar la fecha seleccionada
+        selectedDate = date;
+
+        // Actualizar el texto de la fecha superior
+        updateDateText(date);
+
+        // Recargar las actividades filtradas por la fecha seleccionada
+        loadActividadesFromFirestore();
+    }
+
+    private void updateDateText(LocalDate date) {
+        if (textFechaToday == null) return;
+
+        // Convertir LocalDate a Calendar para formatear
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+
+        // Formatear en español
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d 'de' MMMM", new Locale("es", "ES"));
+        String formattedDate = sdf.format(calendar.getTime());
+        formattedDate = formattedDate.substring(0, 1).toUpperCase() + formattedDate.substring(1);
+
+        textFechaToday.setText(formattedDate);
     }
 
     private void setupProximosPlanes(View view) {
@@ -298,6 +341,20 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
             // Obtener la fecha y hora actual
             Calendar now = Calendar.getInstance();
 
+            // NUEVO: Obtener la fecha seleccionada en el calendario
+            Calendar selectedDateCal = Calendar.getInstance();
+            selectedDateCal.set(selectedDate.getYear(), selectedDate.getMonthValue() - 1, selectedDate.getDayOfMonth());
+            selectedDateCal.set(Calendar.HOUR_OF_DAY, 0);
+            selectedDateCal.set(Calendar.MINUTE, 0);
+            selectedDateCal.set(Calendar.SECOND, 0);
+            selectedDateCal.set(Calendar.MILLISECOND, 0);
+
+            // Calcular el inicio y fin del día seleccionado
+            Calendar startOfSelectedDay = (Calendar) selectedDateCal.clone();
+            Calendar endOfSelectedDay = (Calendar) selectedDateCal.clone();
+            endOfSelectedDay.add(Calendar.DAY_OF_YEAR, 1);
+            endOfSelectedDay.add(Calendar.MILLISECOND, -1);
+
             // Limpiar las listas
             proximosPlanesList.clear();
             planesTerminadosList.clear();
@@ -324,14 +381,50 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
                     fechaFinCal.setTimeInMillis(fechaFin.toDate().getTime());
                 }
 
+                // NUEVO: Filtrar por la fecha seleccionada
+                // Verificar si la actividad pertenece al día seleccionado
+                boolean belongsToSelectedDay = false;
+
+                // Normalizar la fecha de inicio al inicio del día para comparar
+                Calendar fechaInicioNormalizada = (Calendar) fechaInicioCal.clone();
+                fechaInicioNormalizada.set(Calendar.HOUR_OF_DAY, 0);
+                fechaInicioNormalizada.set(Calendar.MINUTE, 0);
+                fechaInicioNormalizada.set(Calendar.SECOND, 0);
+                fechaInicioNormalizada.set(Calendar.MILLISECOND, 0);
+
+                // Verificar si la fecha de inicio está en el día seleccionado
+                if (fechaInicioNormalizada.equals(selectedDateCal)) {
+                    belongsToSelectedDay = true;
+                } else if (fechaFinCal != null) {
+                    // También verificar si la actividad se extiende al día seleccionado
+                    Calendar fechaFinNormalizada = (Calendar) fechaFinCal.clone();
+                    fechaFinNormalizada.set(Calendar.HOUR_OF_DAY, 0);
+                    fechaFinNormalizada.set(Calendar.MINUTE, 0);
+                    fechaFinNormalizada.set(Calendar.SECOND, 0);
+                    fechaFinNormalizada.set(Calendar.MILLISECOND, 0);
+
+                    // Si la actividad comienza antes del día seleccionado pero termina en o después del día seleccionado
+                    if (fechaInicioNormalizada.before(selectedDateCal) &&
+                            (fechaFinNormalizada.equals(selectedDateCal) || fechaFinNormalizada.after(selectedDateCal))) {
+                        belongsToSelectedDay = true;
+                    }
+                }
+
+                // Si la actividad no pertenece al día seleccionado, saltarla
+                if (!belongsToSelectedDay) {
+                    continue;
+                }
+
                 // PRIORIDAD: Verificar si está en curso (hora actual entre inicio y fin)
-                // Si la hora actual está dentro del rango, pasa inmediatamente a "plan en curso"
+                // Solo verificar si estamos en el día de hoy
                 boolean isEnCurso = false;
-                if (fechaFinCal != null) {
+                boolean isToday = selectedDate.equals(LocalDate.now());
+
+                if (isToday && fechaFinCal != null) {
                     // Verificar si la hora actual está entre inicio y fin (inclusive)
                     isEnCurso = (now.after(fechaInicioCal) || now.equals(fechaInicioCal))
                             && (now.before(fechaFinCal) || now.equals(fechaFinCal));
-                } else {
+                } else if (isToday) {
                     // Si no hay fecha fin, verificar si ya pasó la fecha de inicio
                     isEnCurso = now.after(fechaInicioCal) || now.equals(fechaInicioCal);
                 }
@@ -360,7 +453,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
                             })
                             .addOnFailureListener(error -> {
                                 // Error al actualizar, pero continuamos con el flujo normal
-                                android.util.Log.e("CalendarFragment", "Error al marcar actividad como completada: " + e.getMessage());
+                                android.util.Log.e("CalendarFragment", "Error al marcar actividad como completada: " + error.getMessage());
                             });
                     // Actualizar el estado localmente para que se refleje inmediatamente
                     estado = "completado";
@@ -369,8 +462,8 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
                 PlanModel plan = convertDocumentToPlanModel(doc, estado); // Pasar el estado actualizado
                 if (plan == null) continue;
 
-                // Clasificar la actividad: PRIORIDAD para "en curso"
-                if (isEnCurso) {
+                // Clasificar la actividad: PRIORIDAD para "en curso" (solo si es hoy)
+                if (isToday && isEnCurso) {
                     // Plan en curso: desaparece de "próximo plan" y se traslada aquí
                     // Solo uno puede estar en curso (tomar el primero que cumpla la condición)
                     if (planEnCurso == null) {
@@ -417,8 +510,8 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
             proximosPlanesAdapter.notifyDataSetChanged();
             planesTerminadosAdapter.notifyDataSetChanged();
 
-            // Mostrar plan en curso (si existe)
-            if (planEnCurso != null) {
+            // Mostrar plan en curso (solo si es hoy)
+            if (planEnCurso != null && selectedDate.equals(LocalDate.now())) {
                 updateCurrentPlanUI(planEnCurso, tituloEnCurso, descripcionEnCurso, horaInicioFinEnCurso);
             } else {
                 clearCurrentPlanUI();

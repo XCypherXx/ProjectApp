@@ -20,13 +20,12 @@ public class CalendarDayModel {
     public LocalDate getDate() {
         return date;
     }
-
     /**
      * Obtiene el nombre corto del día de la semana (Ej: LUN, MAR) en mayúsculas.
      */
     public String getDayOfWeekName() {
         // Usa el idioma por defecto del dispositivo para obtener el nombre corto.
-        return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault()).toUpperCase();
+        return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("es", "ES")).toUpperCase();
     }
 
     /**
