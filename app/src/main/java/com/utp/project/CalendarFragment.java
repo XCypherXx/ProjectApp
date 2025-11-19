@@ -75,7 +75,54 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
         // Cargar actividades desde Firestore
         loadActividadesFromFirestore();
 
+        // FUNCIONALIDAD: Click en el título para volver a HOY
+        View titleView = view.findViewById(R.id.calendar_title); // Asegúrate de que sea View o TextView según tu XML
+        titleView.setOnClickListener(v -> {
+            resetToToday();
+        });
+
         return view;
+    }
+
+    private void resetToToday() {
+        LocalDate today = LocalDate.now();
+        int todayIndex = -1;
+
+        // 1. Buscar en qué posición de la lista está el día de hoy
+        for (int i = 0; i < allDates.size(); i++) {
+            if (allDates.get(i).getDate().isEqual(today)) {
+                todayIndex = i;
+                break;
+            }
+        }
+
+        if (todayIndex != -1) {
+            // 2. Actualizar visualmente la selección en el adaptador
+            calendarAdapter.setSelection(todayIndex);
+
+            // 3. Realizar el scroll centrado
+            scrollToCenter(todayIndex);
+
+            // 4. Actualizar lógica (Texto de fecha y carga de datos)
+            // Llamamos manualmente a onDateSelected para reutilizar tu lógica existente
+            onDateSelected(today);
+        }
+    }
+
+    // Metodo auxiliar para centrar el scroll (refactorizado para usarlo aquí y en el inicio)
+    private void scrollToCenter(int position) {
+        int recyclerWidth = calendarRecyclerView.getWidth();
+        if (recyclerWidth > 0) {
+            // Estimación rápida del ancho del item (o obtenlo si hay vistas visibles)
+            View child = layoutManager.findViewByPosition(layoutManager.findFirstVisibleItemPosition());
+            int itemWidth = (child != null) ? child.getWidth() : (int)(60 * getResources().getDisplayMetrics().density);
+
+            int offset = (recyclerWidth / 2) - (itemWidth / 2);
+            layoutManager.scrollToPositionWithOffset(position, offset);
+        } else {
+            // Si por alguna razón no tiene ancho aún
+            layoutManager.scrollToPosition(position);
+        }
     }
 
     @Override
@@ -106,53 +153,64 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
     }
 
     private void initializeCalendar() {
-        // 1. Generar la lista inicial de fechas (30 días atrás + Hoy + 30 días adelante)
+        // 1. Generar la lista inicial de fechas
         allDates = generateInitialDates(PRELOAD_DAYS);
 
-        // 2. Configurar el RecyclerView para scroll horizontal
+        // 2. Configurar el RecyclerView
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         calendarRecyclerView.setLayoutManager(layoutManager);
 
         calendarAdapter = new CalendarAdapter(getContext(), allDates, this);
         calendarRecyclerView.setAdapter(calendarAdapter);
 
-        // 3. MEJORADO: Desplazar al día de hoy y centrarlo en el medio del contenedor
-        // Usamos post() para asegurar que el RecyclerView ya haya sido medido.
-        calendarRecyclerView.post(() -> {
-            int todayPosition = PRELOAD_DAYS; // La posición del día de hoy
-            if (todayPosition < allDates.size()) {
-                // Obtener el ancho del RecyclerView
+        // 3. CALCULAR POSICIÓN DE HOY
+        int todayPosition = PRELOAD_DAYS; // Índice 30 es "Hoy"
+
+        // --- CORRECCIÓN CRÍTICA ---
+        // PASO A: Scroll inmediato para evitar ver el mes pasado.
+        // Esto le dice al LayoutManager: "Cuando empieces a dibujar, empieza AQUÍ, no en el 0".
+        layoutManager.scrollToPosition(todayPosition);
+
+        // PASO B: Ajuste fino para CENTRAR el elemento en la pantalla.
+        // Usamos ViewTreeObserver para esperar a que el RecyclerView tenga ancho real.
+        calendarRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                // Importante: Remover el listener para que no se repita
+                calendarRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                // Verificar que el RecyclerView tenga dimensiones válidas
                 int recyclerWidth = calendarRecyclerView.getWidth();
-                // Obtener el ancho de un item (asumiendo que todos tienen el mismo ancho)
-                View firstChild = layoutManager.findViewByPosition(0);
-                if (firstChild != null) {
-                    int itemWidth = firstChild.getWidth();
-                    // Calcular el offset para centrar el día de hoy
-                    int offset = (recyclerWidth / 2) - (itemWidth / 2);
-                    layoutManager.scrollToPositionWithOffset(todayPosition, offset);
-                } else {
-                    // Si no hay vista visible, usar un delay para esperar a que se renderice
-                    calendarRecyclerView.postDelayed(() -> {
-                        View child = layoutManager.findViewByPosition(todayPosition);
-                        if (child != null) {
-                            int itemWidth = child.getWidth();
-                            // Reutilizar recyclerWidth del scope externo o recalcular
-                            int recyclerWidthDelayed = calendarRecyclerView.getWidth();
-                            int offset = (recyclerWidthDelayed / 2) - (itemWidth / 2);
-                            layoutManager.scrollToPositionWithOffset(todayPosition, offset);
-                        } else {
-                            // Fallback: simplemente desplazar a la posición
-                            layoutManager.scrollToPosition(todayPosition);
-                        }
-                    }, 100);
+                if (recyclerWidth <= 0) return;
+
+                // Intentamos obtener el ancho de un ítem.
+                // Como ya hicimos scrollToPosition(todayPosition), el layoutManager debería tener esa vista cerca.
+                // Si no, forzamos la medición de la primera vista disponible.
+                View view = layoutManager.findViewByPosition(todayPosition);
+                if (view == null) {
+                    view = layoutManager.findViewByPosition(layoutManager.findFirstVisibleItemPosition());
                 }
-            } else {
-                // Fallback
-                layoutManager.scrollToPosition(todayPosition);
+
+                int itemWidth = 0;
+                if (view != null) {
+                    itemWidth = view.getWidth();
+                } else {
+                    // Si aún es null (muy raro tras el layout), estimamos un ancho estándar (ej. 60dp)
+                    // o simplemente confiamos en el scroll anterior.
+                    // 60dp en pixeles aprox:
+                    float density = getResources().getDisplayMetrics().density;
+                    itemWidth = (int) (60 * density);
+                }
+
+                // Fórmula para centrar: (AnchoPantalla / 2) - (AnchoItem / 2)
+                int offset = (recyclerWidth / 2) - (itemWidth / 2);
+
+                // Aplicamos el scroll final con el desplazamiento calculado
+                layoutManager.scrollToPositionWithOffset(todayPosition, offset);
             }
         });
 
-        // 4. Implementar la lógica de carga continua (scroll infinito)
+        // 4. Implementar la lógica de carga continua
         setupContinuousScroll();
     }
 
@@ -234,11 +292,18 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnDate
 
             // Agregar las nuevas fechas al inicio
             allDates.addAll(0, newDates);
+
+            // Notificamos la inserción
             calendarAdapter.notifyItemRangeInserted(0, numDays);
 
-            // Ajustar el scroll para que la posición visible no cambie al insertar
-            int adjustment = numDays;
-            layoutManager.scrollToPosition(adjustment);
+            // CORRECCIÓN CLAVE: Ajustamos la posición seleccionada en el adaptador
+            // Si insertamos 30 ítems arriba, el índice seleccionado sube +30
+            calendarAdapter.adjustSelectedPosition(numDays);
+
+            // Ajustar el scroll visual para que el usuario no note el salto
+            // Al insertar al principio, todo se empuja hacia abajo/derecha. Debemos corregir eso.
+            // Nota: LinearLayoutManager suele manejar esto bien con notifyItemRangeInserted,
+            // pero si notas saltos, podrías necesitar ajustar el scroll aquí también.
         }
         isLoading = false;
     }

@@ -45,10 +45,16 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
         LocalDate today = LocalDate.now();
         for (int i = 0; i < dayList.size(); i++) {
             if (dayList.get(i).getDate().isEqual(today)) {
-                dayList.get(i).setSelected(true);
                 selectedPosition = i;
                 // No break, en caso de que existan duplicados (aunque no debería)
             }
+        }
+    }
+
+    // METODO NUEVO IMPORTANTE: Ajusta la selección cuando insertamos días al inicio
+    public void adjustSelectedPosition(int offset) {
+        if (selectedPosition != RecyclerView.NO_POSITION) {
+            selectedPosition += offset;
         }
     }
 
@@ -67,38 +73,37 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
         holder.dayOfWeekText.setText(model.getDayOfWeekName());
         holder.dayNumberText.setText(model.getDayNumber());
 
+        // CORRECCIÓN: La única verdad es si 'position' coincide con 'selectedPosition'
+        boolean isSelected = (position == selectedPosition);
+
         // --- Lógica de Estilo (Colores Material Design) ---
-        if (model.isSelected()) {
-            // Estado SELECCIONADO: Fondo del pilar oscuro, Círculo de número activo
+        if (isSelected) {
+            // Estilo SELECCIONADO
             holder.dayContainer.setBackgroundResource(R.drawable.rounded_day_pillar_selected);
             holder.dayOfWeekText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_secondaryContainer));
             holder.dayNumberText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_onTertiaryContainer));
             holder.dayNumberText.setBackgroundResource(R.drawable.rounded_selection_circle_active);
         } else {
-            // Estado INACTIVO: Fondo del pilar claro, Sin círculo, Texto negro
+            // Estilo INACTIVO
             holder.dayContainer.setBackgroundResource(R.drawable.rounded_day_pillar_inactive);
             holder.dayOfWeekText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_secondaryContainer));
             holder.dayNumberText.setTextColor(ContextCompat.getColor(context, R.color.md_theme_tertiaryContainer));
-            holder.dayNumberText.setBackgroundResource(0); // Sin fondo de círculo
+            holder.dayNumberText.setBackgroundResource(0);
         }
 
-        // Manejar Clic
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null && holder.getAdapterPosition() != RecyclerView.NO_POSITION) {
-                int newPosition = holder.getAdapterPosition();
+            int currentPos = holder.getAdapterPosition();
+            if (currentPos == RecyclerView.NO_POSITION) return;
 
-                // 1. Desactiva la selección anterior y notifica el cambio
-                if (selectedPosition != RecyclerView.NO_POSITION) {
-                    dayList.get(selectedPosition).setSelected(false);
-                    notifyItemChanged(selectedPosition);
-                }
+            // Guardamos la posición anterior para actualizarla visualmente
+            int previousPos = selectedPosition;
+            selectedPosition = currentPos;
 
-                // 2. Activa la nueva selección y notifica el cambio
-                selectedPosition = newPosition;
-                dayList.get(selectedPosition).setSelected(true);
-                notifyItemChanged(selectedPosition);
+            // Notificamos cambios para repintar (despintar el viejo, pintar el nuevo)
+            notifyItemChanged(previousPos);
+            notifyItemChanged(selectedPosition);
 
-                // 3. Notifica al fragmento la fecha seleccionada
+            if (listener != null) {
                 listener.onDateSelected(model.getDate());
             }
         });
@@ -121,5 +126,20 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
             dayOfWeekText = itemView.findViewById(R.id.text_day_of_week);
             dayNumberText = itemView.findViewById(R.id.text_day_number);
         }
+    }
+
+    // METODO NUEVO: Permite seleccionar una posición programáticamente
+    public void setSelection(int newPosition) {
+        if (newPosition < 0 || newPosition >= dayList.size()) return;
+
+        int previousPos = selectedPosition;
+        selectedPosition = newPosition;
+
+        // Despintar el anterior
+        if (previousPos != RecyclerView.NO_POSITION) {
+            notifyItemChanged(previousPos);
+        }
+        // Pintar el nuevo
+        notifyItemChanged(selectedPosition);
     }
 }
