@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -966,12 +968,11 @@ public class AddFragment extends Fragment {
             btnGuardar.setEnabled(false);
         }
 
+        // 2. OBTENER TÍTULO Y DESCRIPCIÓN PRIMERO
         String titulo = editTextTitle.getText().toString().trim();
         if (titulo.isEmpty()) {
             Toast.makeText(requireContext(), "Por favor, ingresa un título", Toast.LENGTH_SHORT).show();
             editTextTitle.requestFocus();
-
-            // REACTIVAR si hay error de validación
             if (btnGuardar != null) btnGuardar.setEnabled(true);
             return;
         }
@@ -981,10 +982,9 @@ public class AddFragment extends Fragment {
             descripcion = null;
         }
 
-        // Validación de fechas
+        // 3. VALIDACIÓN DE FECHAS
         if (endCalendar.before(startCalendar)) {
             validateEndTime();
-            // REACTIVAR si hay error de validación
             if (btnGuardar != null) btnGuardar.setEnabled(true);
             return;
         }
@@ -992,6 +992,44 @@ public class AddFragment extends Fragment {
         Timestamp inicio = new Timestamp(startCalendar.getTime());
         Timestamp fin = new Timestamp(endCalendar.getTime());
 
+        // 4. PROGRAMAR LA NOTIFICACIÓN SI CORRESPONDE
+        if (notificationMinutesBefore >= 0) {
+            try {
+                //  Calcular hora de notificación
+                Calendar notificationTime = (Calendar) startCalendar.clone();
+                notificationTime.add(Calendar.MINUTE, -notificationMinutesBefore);
+
+                //  CLAVE: FORZAR A QUE SEA EN PUNTO (sin segundos ni milisegundos)
+                notificationTime.set(Calendar.SECOND, 0);
+                notificationTime.set(Calendar.MILLISECOND, 0);
+
+                Log.d("AddFragment", "Hora de notificación calculada EXACTA: " + notificationTime.getTime());
+                Log.d("AddFragment", " Hora actual del sistema: " + new Date(System.currentTimeMillis()));
+
+                if (notificationTime.getTimeInMillis() < System.currentTimeMillis()) {
+                    Log.w("AddFragment", "⚠ La hora de notificación ya pasó. Ajusta notificationMinutesBefore o la hora.");
+                }
+
+                int notificationId = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
+                Log.d("AddFragment", " Notification ID generado: " + notificationId);
+
+                //  PROGRAMAR ALARMA
+                NotificationReceiver.programarAlarma(
+                        requireContext(),
+                        notificationTime.getTimeInMillis(),
+                        "Recordatorio: " + titulo,
+                        "Tu actividad comienza pronto: " + titulo,
+                        notificationId
+                );
+
+                Log.d("AddFragment", " Alarma enviada correctamente al AlarmManager");
+
+            } catch (Exception e) {
+                Log.e("AddFragment", " Error al programar notificación: " + e.getMessage(), e);
+            }
+        }
+
+        // 5. CREAR OBJETO ACTIVIDAD PARA FIRESTORE
         java.util.Map<String, Object> actividad = com.utp.project.data.FirestoreService.buildActividad(
                 titulo,
                 inicio,
@@ -1007,25 +1045,26 @@ public class AddFragment extends Fragment {
                 getPrioridadSeleccionada()
         );
 
+        // 6. GUARDAR EN FIRESTORE
         com.utp.project.data.FirestoreService.addActividad(actividad)
                 .addOnSuccessListener(ref -> {
                     Toast.makeText(requireContext(), "Actividad guardada", Toast.LENGTH_SHORT).show();
-                    // ÉXITO: No reactivamos el botón porque cerramos la pantalla
+                    Log.d("AddFragment", "Actividad guardada en Firestore correctamente.");
+
+                    // Opcional: ir al HomeFragment
                     if (getActivity() != null) {
                         getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.frame_layout, new HomeFragment()) // Reemplaza con HomeFragment
-                                // .addToBackStack(null) // No añadimos al backstack para que 'atrás' salga de la app o vaya al login
+                                .replace(R.id.frame_layout, new HomeFragment())
                                 .commit();
                     }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(requireContext(), "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
+                    Log.e("AddFragment", "Error guardando actividad: " + e.getMessage(), e);
 
-                    // ERROR: REACTIVAR el botón para que el usuario pueda intentar de nuevo
-                    if (btnGuardar != null) {
-                        btnGuardar.setEnabled(true);
-                    }
+                    // Reactivar el botón para reintento
+                    if (btnGuardar != null) btnGuardar.setEnabled(true);
                 });
-        }
     }
+
+}
