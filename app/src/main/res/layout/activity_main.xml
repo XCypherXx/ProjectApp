@@ -13,7 +13,7 @@
         android:layout_height="140dp"
         android:layout_marginBottom="70dp"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/icono_agenda"
+        android:src="@drawable/ic_agend"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
