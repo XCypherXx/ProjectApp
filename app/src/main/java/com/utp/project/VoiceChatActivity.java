@@ -3,7 +3,8 @@ package com.utp.project;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,13 +28,25 @@ public class VoiceChatActivity extends AppCompatActivity
     private FirestoreActivityRepository repository;
 
     private FloatingActionButton btnStartVoice;
+    private TextView tvMessage;
+    private TextView tvListening;
+    private View btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home); // crea este layout con un botón
+        setContentView(R.layout.activity_voice_chat); // CAMBIO: usar activity_voice_chat
 
-        btnStartVoice = findViewById(R.id.fab);
+        btnStartVoice = findViewById(R.id.btn_mic); // CAMBIO: usar btn_mic del layout
+        tvMessage = findViewById(R.id.tv_message);
+        tvListening = findViewById(R.id.tv_listening);
+        btnBack = findViewById(R.id.btn_back);
+
+        // Botón de volver
+        btnBack.setOnClickListener(v -> finish());
+
+        // Inicialmente ocultar el texto "Escuchando..."
+        tvListening.setVisibility(View.GONE);
 
         voiceProcessor = new VoiceToActivityProcessor(this, this);
         repository = new FirestoreActivityRepository();
@@ -100,50 +113,70 @@ public class VoiceChatActivity extends AppCompatActivity
 
     @Override
     public void onVoiceProcessingStarted() {
-        Toast.makeText(this, "Escuchando... habla ahora.", Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> {
+            tvMessage.setText("🎤 Escuchando... habla ahora.");
+            tvListening.setVisibility(View.VISIBLE);
+        });
     }
 
     @Override
     public void onTextRecognized(String rawText) {
-        Toast.makeText(this, "Texto reconocido: " + rawText, Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> {
+            tvMessage.setText("✅ Texto reconocido:\n" + rawText);
+            tvListening.setVisibility(View.GONE);
+        });
     }
 
     @Override
     public void onActivityParsed(ActivityData activityData) {
-        Toast.makeText(this,
-                "Actividad generada: " + activityData.getTitle(),
-                Toast.LENGTH_LONG).show();
+        runOnUiThread(() -> {
+            tvMessage.setText("✨ Procesando actividad...");
+        });
 
         // Aquí guardamos en Firestore
         String uid = getCurrentUserId();
         if (uid == null) {
-            Toast.makeText(this,
-                    "Usuario no autenticado. No se puede guardar en Firestore.",
-                    Toast.LENGTH_LONG).show();
+            runOnUiThread(() -> {
+                Toast.makeText(this,
+                        "Usuario no autenticado. No se puede guardar en Firestore.",
+                        Toast.LENGTH_LONG).show();
+                tvMessage.setText("❌ Error: Usuario no autenticado");
+            });
             return;
         }
 
         repository.saveUserActivity(uid, activityData, new FirestoreActivityRepository.SaveCallback() {
             @Override
             public void onSuccess(String activityId) {
-                Toast.makeText(VoiceChatActivity.this,
-                        "Actividad guardada con id: " + activityId,
-                        Toast.LENGTH_LONG).show();
-                // Aquí tu calendario puede refrescar datos si lo deseas.
+                runOnUiThread(() -> {
+                    Toast.makeText(VoiceChatActivity.this,
+                            "✅ Actividad guardada exitosamente",
+                            Toast.LENGTH_LONG).show();
+                    tvMessage.setText("✅ Actividad creada:\n" + activityData.getTitle());
+                    // Cerrar después de 2 segundos
+                    btnStartVoice.postDelayed(() -> finish(), 2000);
+                });
             }
 
             @Override
             public void onError(Exception exception) {
-                Toast.makeText(VoiceChatActivity.this,
-                        "Error al guardar en Firestore: " + exception.getMessage(),
-                        Toast.LENGTH_LONG).show();
+                runOnUiThread(() -> {
+                    Toast.makeText(VoiceChatActivity.this,
+                            "❌ Error al guardar: " + exception.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    tvMessage.setText("❌ Error al guardar la actividad");
+                });
             }
         });
     }
 
     @Override
     public void onError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        runOnUiThread(() -> {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            tvMessage.setText("❌ " + message);
+            tvListening.setVisibility(View.GONE);
+        });
     }
 
     private String getCurrentUserId() {

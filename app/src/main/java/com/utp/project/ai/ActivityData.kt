@@ -9,5 +9,6 @@ data class ActivityData(
     val location: String?,
     val prioridad: String?,   // prioridad (ej: "alta", "media", "baja")
     val categoria: String?,   // ej: "cita médica", "reunión", etc.
-    val notes: String?        // campo libre
+    val notes: String?,        // campo libre
+    val notificarMinAntes: Int? = null  // minutos antes de la actividad para notificar
 )

@@ -7,6 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import com.utp.project.BuildConfig
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class GeminiService private constructor(
     private val generativeModel: GenerativeModel
@@ -32,33 +34,54 @@ class GeminiService private constructor(
         }
 
     private fun buildPrompt(userInput: String): String {
+        val today = LocalDate.now()
+        val todayStr = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
         return """
 Eres un asistente que interpreta texto hablado y lo convierte en una actividad de agenda.
 
+FECHA ACTUAL: $todayStr (usa esta como referencia para fechas relativas como "mañana", "lunes", etc.)
+
 Reglas IMPORTANTES:
 - Devuelve SIEMPRE SOLO un JSON VÁLIDO (sin texto adicional, sin explicación).
+- Las fechas DEBEN estar en formato "YYYY-MM-DD" (ejemplo: "2025-01-15").
+- Las horas DEBEN estar en formato "HH:mm" en 24 horas (ejemplo: "15:30" para las 3:30 PM).
+- Si el usuario dice "mañana", calcula la fecha de mañana basándote en la fecha actual.
+- Si el usuario dice "lunes", "martes", etc., calcula la próxima ocurrencia de ese día.
 - Si no hay fecha clara, usa null en "dateStart" y "dateEnd".
 - Si no hay hora clara, usa null en "timeStart" y "timeEnd".
 - Si no hay lugar, usa null en "location".
 - "prioridad" puede ser "alta", "media", "baja" o null si no se puede inferir.
 - "categoria" es una etiqueta corta, por ejemplo: "cita médica", "reunión", "estudio", etc., o null si no se puede inferir.
 - "notes" puede contener información adicional que no encaje en los otros campos, o null.
+- "notificarMinAntes": Si el usuario menciona cuándo quiere ser notificado (ej: "avísame 30 minutos antes", "notifícame 1 hora antes"), convierte eso a minutos. Si no menciona nada, usa null.
+
+Ejemplos de conversión de fechas relativas:
+- "mañana" → fecha de mañana
+- "pasado mañana" → fecha de pasado mañana
+- "lunes" → próximo lunes desde hoy
+- "el 15 de enero" → "2025-01-15" (ajusta el año si es necesario)
+
+Ejemplos de conversión de horas:
+- "3pm" o "3 PM" → "15:00"
+- "9:30am" → "09:30"
+- "las 2 de la tarde" → "14:00"
 
 Devuelve SIEMPRE una respuesta JSON con estos campos:
-title, dateStart, dateEnd, timeStart, timeEnd, location, prioridad, categoria, notes.
+title, dateStart, dateEnd, timeStart, timeEnd, location, prioridad, categoria, notes, notificarMinAntes.
 
-Ejemplo de formato esperado (solo formato, no lo uses literalmente):
-
+Ejemplo de formato esperado:
 {
   "title": "Cita médica con el Dr. Pérez",
-  "dateStart": "2025-05-12",
-  "dateEnd": "2025-05-12",
+  "dateStart": "2025-01-15",
+  "dateEnd": "2025-01-15",
   "timeStart": "15:00",
   "timeEnd": "16:00",
   "location": "Clínica San Juan",
   "prioridad": "alta",
   "categoria": "cita médica",
-  "notes": "Llevar resultados de laboratorio"
+  "notes": "Llevar resultados de laboratorio",
+  "notificarMinAntes": 30
 }
 
 Texto del usuario: "$userInput"
@@ -70,13 +93,21 @@ Texto del usuario: "$userInput"
      * Ignora texto fuera de llaves si el modelo llegara a agregar algo.
      */
     private fun parseJsonToActivityData(rawResponse: String): ActivityData {
-        // Tratar de aislar el bloque JSON principal
         val jsonString = extractFirstJsonObject(rawResponse)
-
         val json = JSONObject(jsonString)
 
         fun JSONObject.optNullableString(key: String): String? {
             return if (has(key) && !isNull(key)) optString(key, null) else null
+        }
+
+        fun JSONObject.optNullableInt(key: String): Int? {
+            return if (has(key) && !isNull(key)) {
+                try {
+                    optInt(key, 0).takeIf { it > 0 }
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
         }
 
         val title = json.optString("title", "").ifBlank {
@@ -91,6 +122,7 @@ Texto del usuario: "$userInput"
         val prioridad = json.optNullableString("prioridad")
         val categoria = json.optNullableString("categoria")
         val notes = json.optNullableString("notes")
+        val notificarMinAntes = json.optNullableInt("notificarMinAntes")
 
         return ActivityData(
             title = title,
@@ -101,7 +133,8 @@ Texto del usuario: "$userInput"
             location = location,
             prioridad = prioridad,
             categoria = categoria,
-            notes = notes
+            notes = notes,
+            notificarMinAntes = notificarMinAntes
         )
     }
 
