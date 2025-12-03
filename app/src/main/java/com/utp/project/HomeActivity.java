@@ -211,15 +211,12 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
     private void activateMicrophone() {
         Toast.makeText(this, "Micrófono Activado por Agitación", Toast.LENGTH_SHORT).show();
 
-        // Cargar el fragmento del micrófono.
-        // ¡Esto cumple con la parte de "se active el microfono automaticamente y se visualice"!
-      /////////  replaceFragment(new MicFragment());
-
-        // Opcional: Resaltar el ícono del micrófono en el BottomNav
-     ///////   binding.bottomNavigationView.setSelectedItemId(R.id.microfono);
-
-        // Importante: Volver a registrar el sensor después de un breve retraso
-        // (Podrías usar un Handler, pero para mantenerlo simple, lo haremos en onRequestPermissionsResult)
+        // Abrir VoiceChatActivity con un flag que indique activación automática
+        Intent intent = new Intent(HomeActivity.this, VoiceChatActivity.class);
+        intent.putExtra("auto_start_mic", true); // Flag para activación automática
+        // AGREGAMOS LA SEÑAL: "true" significa que debe arrancar solo
+        intent.putExtra("AUTO_START_MIC", true);
+        startActivity(intent);
     }
 
     // Manejo del Resultado de la Solicitud de Permisos

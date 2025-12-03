@@ -23,6 +23,7 @@ public class VoiceChatActivity extends AppCompatActivity
         implements VoiceToActivityProcessor.Callback {
 
     private static final int REQ_RECORD_AUDIO = 1001;
+    private static final String EXTRA_AUTO_START_MIC = "auto_start_mic"; // Constante para el extra
 
     private VoiceToActivityProcessor voiceProcessor;
     private FirestoreActivityRepository repository;
@@ -31,6 +32,7 @@ public class VoiceChatActivity extends AppCompatActivity
     private TextView tvMessage;
     private TextView tvListening;
     private View btnBack;
+    private boolean shouldAutoStartMic = false; // Flag para activación automática
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,28 @@ public class VoiceChatActivity extends AppCompatActivity
                 requestAudioPermission();
             }
         });
+        // Verificamos si venimos de una agitación
+        boolean autoStart = getIntent().getBooleanExtra("AUTO_START_MIC", false);
+
+        if (autoStart) {
+            // Si es automático, verificamos permiso y arrancamos de una vez
+            if (checkAudioPermission()) {
+                autoStartMicrophone(); // <--- Inicia la escucha sin pulsar el botón
+            } else {
+                requestAudioPermission();
+            }
+        }
+    }
+
+    private void autoStartMicrophone() {
+        if (checkAudioPermission()) {
+            // Ya tiene permiso, activar directamente
+            startVoiceFlow();
+        } else {
+            // No tiene permiso, solicitarlo
+            // Cuando se conceda, se activará automáticamente en onRequestPermissionsResult
+            requestAudioPermission();
+        }
     }
 
     private void startVoiceFlow() {
@@ -100,7 +124,14 @@ public class VoiceChatActivity extends AppCompatActivity
         if (requestCode == REQ_RECORD_AUDIO) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startVoiceFlow();
+                // NUEVO: Si venía del sensor de agitación, activar automáticamente
+                if (shouldAutoStartMic) {
+                    startVoiceFlow();
+                } else {
+                    // Comportamiento normal: solo activar si el usuario hizo click
+                    // (aunque en este caso, si llegó aquí es porque hizo click, así que también activamos)
+                    startVoiceFlow();
+                }
             } else {
                 Toast.makeText(this,
                         "Se requiere permiso de micrófono para usar esta función.",
