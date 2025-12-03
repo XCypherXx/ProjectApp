@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.utp.project.data.FirestoreService;
 import com.utp.project.databinding.ActivityHomeBinding;
 
 //Importacion para Place SDK
@@ -60,13 +61,15 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
 
         // NUEVO: garantizar sesión (anónima si no hay) y merge de documento usuario
         FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
-        if (current == null) {
-            FirebaseAuth.getInstance().signInAnonymously()
-                    .addOnSuccessListener(r -> com.utp.project.data.FirestoreService.ensureUserDocument(null))
-                    .addOnFailureListener(e -> Toast.makeText(this, "Error autenticación anónima: " + e.getMessage(), Toast.LENGTH_LONG).show());
+        if (current != null) {
+            FirestoreService.ensureUserDocument(null);
         } else {
-            com.utp.project.data.FirestoreService.ensureUserDocument(null);
+            // Si no hay usuario, devuélvelo al login.
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
         }
+
 
         // Solo inicializa si no ha sido inicializado antes
         if (!Places.isInitialized() && !GOOGLE_API_KEY.isEmpty()) {

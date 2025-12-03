@@ -6,16 +6,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
-
+import android.speech.tts.TextToSpeech;
 public class NotificationReceiver extends BroadcastReceiver {
-
+    private TextToSpeech tts;
     private static final String TAG = "NotificationReceiver";
     public static final String ACTION_SHOW_NOTIFICATION = "com.utp.project.ACTION_SHOW_NOTIFICATION";
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
         Log.e(TAG, "========================================");
         Log.e(TAG, ">>> NOTIFICATION RECEIVER ACTIVADO <<<");
         Log.e(TAG, "========================================");
@@ -25,58 +27,69 @@ public class NotificationReceiver extends BroadcastReceiver {
             return;
         }
 
-        String action = intent.getAction();
-        Log.d(TAG, "Action recibida: " + action);
+        // Obtener datos
+        String titulo = intent.getStringExtra("titulo");
+        String mensaje = intent.getStringExtra("mensaje");
+        String username = intent.getStringExtra("username"); // NUEVO
+        int notificacionId = intent.getIntExtra("notificacion_id",
+                (int) (System.currentTimeMillis() % Integer.MAX_VALUE));
 
-        // --- Adquirir WakeLock para asegurar que la notificación se muestre ---
-        PowerManager.WakeLock wakeLock = null;
-        try {
-            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            if (powerManager != null) {
-                wakeLock = powerManager.newWakeLock(
-                        PowerManager.PARTIAL_WAKE_LOCK |
-                                PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                                PowerManager.ON_AFTER_RELEASE,
-                        "NotificationReceiver::WakeLock"
-                );
-                wakeLock.acquire(5 * 60 * 1000L); // 5 minutos
-                Log.d(TAG, "WakeLock adquirido");
+        if (titulo == null) titulo = "Recordatorio";
+        if (mensaje == null) mensaje = "Tienes una actividad programada";
+        if (username == null) username = "usuario";
+
+        // ============================
+        // 1. MOSTRAR NOTIFICACIÓN NORMAL
+        // ============================
+        NotificationHelper helper = new NotificationHelper(context);
+        helper.showAlarmNotification(notificacionId, titulo, mensaje);
+
+        // ============================
+        // 2. HABLAR LA NOTIFICACIÓN (TTS)
+        // ============================
+        String mensajeHablado =
+                "Hola " + username + ". " +
+                        "Tienes una actividad pendiente, revisalo ahora. " +
+                        mensaje;
+
+        tts = new TextToSpeech(context.getApplicationContext(), status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                tts.setLanguage(new java.util.Locale("es", "ES"));
+
+                // Preparar volumen máximo
+                Bundle params = new Bundle();
+                params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f); // 1.0 = máximo
+
+                // Configurar listener para liberar TTS después de hablar
+                tts.setOnUtteranceProgressListener(new android.speech.tts.UtteranceProgressListener() {
+                    @Override
+                    public void onStart(String utteranceId) {}
+
+                    @Override
+                    public void onDone(String utteranceId) {
+                        tts.shutdown(); // liberar TTS
+                    }
+
+                    @Override
+                    public void onError(String utteranceId) {
+                        tts.shutdown(); // liberar TTS si hay error
+                    }
+                });
+
+                // Reproducir mensaje
+                tts.speak(mensajeHablado, TextToSpeech.QUEUE_FLUSH, params, "ALARMA_TTS");
+
+            } else {
+                Log.e(TAG, "Error inicializando TTS");
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error al adquirir WakeLock: " + e.getMessage(), e);
-        }
+        });
 
-        try {
-            // --- Obtener datos de la notificación ---
-            String titulo = intent.getStringExtra("titulo");
-            String mensaje = intent.getStringExtra("mensaje");
-            int notificacionId = intent.getIntExtra("notificacion_id",
-                    (int) (System.currentTimeMillis() % Integer.MAX_VALUE));
-
-            if (titulo == null || titulo.isEmpty()) titulo = "Recordatorio";
-            if (mensaje == null || mensaje.isEmpty()) mensaje = "Tienes una actividad programada";
-
-            Log.d(TAG, "Mostrando notificación con ID: " + notificacionId + " | Título: " + titulo + " | Mensaje: " + mensaje);
-
-            // --- Mostrar notificación COMPLETA (popup + sonido + vibración) ---
-            NotificationHelper helper = new NotificationHelper(context);
-            helper.showAlarmNotification(notificacionId, titulo, mensaje);
-
-            Log.e(TAG, "✓ NOTIFICACIÓN MOSTRADA EXITOSAMENTE");
-
-        } catch (Exception e) {
-            Log.e(TAG, "ERROR al mostrar notificación: " + e.getMessage(), e);
-        } finally {
-            if (wakeLock != null && wakeLock.isHeld()) {
-                wakeLock.release();
-                Log.d(TAG, "WakeLock liberado");
-            }
-        }
     }
 
     // --- Método para programar alarma ---
     public static void programarAlarma(Context context, long triggerAtMillis,
-                                       String titulo, String mensaje, int notificacionId) {
+                                       String titulo, String mensaje, int notificacionId,
+                                       String username) {
         try {
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (alarmManager == null) {
@@ -89,6 +102,7 @@ public class NotificationReceiver extends BroadcastReceiver {
             intent.putExtra("titulo", titulo);
             intent.putExtra("mensaje", mensaje);
             intent.putExtra("notificacion_id", notificacionId);
+            intent.putExtra("username", username);
 
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     context,

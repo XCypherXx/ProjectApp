@@ -2,10 +2,13 @@ package com.utp.project;
 
 import android.app.Activity;
 import androidx.appcompat.app.AlertDialog;
+
+import android.content.Context;
 import android.content.DialogInterface;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -48,8 +51,11 @@ import android.Manifest; // Necesario para el permiso de contactos
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.Timestamp;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class AddFragment extends Fragment {
 
@@ -995,6 +1001,12 @@ public class AddFragment extends Fragment {
         // 4. PROGRAMAR LA NOTIFICACIÓN SI CORRESPONDE
         if (notificationMinutesBefore >= 0) {
             try {
+
+                // Obtener username desde SharedPreferences
+                SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                String username = prefs.getString("username", "usuario");
+
+
                 //  Calcular hora de notificación
                 Calendar notificationTime = (Calendar) startCalendar.clone();
                 notificationTime.add(Calendar.MINUTE, -notificationMinutesBefore);
@@ -1019,7 +1031,8 @@ public class AddFragment extends Fragment {
                         notificationTime.getTimeInMillis(),
                         "Recordatorio: " + titulo,
                         "Tu actividad comienza pronto: " + titulo,
-                        notificationId
+                        notificationId,
+                        username
                 );
 
                 Log.d("AddFragment", " Alarma enviada correctamente al AlarmManager");
