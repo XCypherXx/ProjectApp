@@ -2,11 +2,24 @@ plugins {
     alias(libs.plugins.android.application)
 
     id("com.google.gms.google-services")
+    id 'org.jetbrains.kotlin.android'
 }
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+def GEMINI_API_KEY = localProperties.getProperty("GEMINI_API_KEY", "")
 
 android {
     namespace = 'com.utp.project'
     compileSdk = 36
+
+    buildFeatures {
+        buildConfig = true
+        viewBinding true
+    }
 
     defaultConfig {
         applicationId = "com.utp.project"
@@ -16,9 +29,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-    buildFeatures {
-        viewBinding true
+        // API KEY
+        buildConfigField "String", "GEMINI_API_KEY", "\"${GEMINI_API_KEY}\""
     }
 
     buildTypes {
@@ -30,6 +42,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
     }
 }
 
@@ -73,4 +88,13 @@ dependencies {
 
     //Google maps
     implementation 'com.google.android.libraries.places:places:3.4.0'
+
+    // Kotlin coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
+
+    // Gemini (SDK oficial de Google AI – ajusta a la versión más reciente)
+    implementation "com.google.ai.client.generativeai:generativeai:0.9.0"
+
+    // (opcional) para logging JSON en debug
+    implementation "org.json:json:20231013"
 }
