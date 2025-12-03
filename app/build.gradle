@@ -97,4 +97,9 @@ dependencies {
 
     // (opcional) para logging JSON en debug
     implementation "org.json:json:20231013"
+
+    implementation 'androidx.core:core-ktx:1.17.0'
+    implementation 'androidx.core:core:1.17.0'
+
+
 }

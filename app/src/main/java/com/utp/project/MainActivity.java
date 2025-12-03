@@ -1,43 +1,68 @@
 package com.utp.project;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int SPLASH_TIME = 5000;
+    private static final int REQ_NOTIFICATIONS = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // logo
+        setContentView(R.layout.activity_main);
 
+        Log.d("MAIN", " MainActivity iniciada");
+
+        // ============================
+        //  PEDIR PERMISO DE NOTIFICACIÓN BIEN HECHO
+        // ============================
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED) {
+
+                Log.w("PERMISOS", " Permiso NO concedido, solicitando...");
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        REQ_NOTIFICATIONS
+                );
+
+            } else {
+                Log.d("PERMISOS", " Permiso YA estaba concedido");
+                lanzarNotificacionPrueba(); // SOLO si ya hay permiso
             }
+
+        } else {
+            // Android 12 o menor no necesita permiso
+            lanzarNotificacionPrueba();
         }
 
-        // Referencia a la primera TextView (nameCreater1)
+        // ============================
+        // UI SPLASH
+        // ============================
         TextView nameCreater1 = findViewById(R.id.nameCreater1);
-
-        // Referencia a la segunda TextView (appName)
         TextView nameCreater2 = findViewById(R.id.nameCreater2);
 
-        // --- Aplica el degradado a la primera TextView (nameCreater1) ---
         nameCreater1.post(() -> {
             int width = nameCreater1.getMeasuredWidth();
             int[] gradientColors = {
@@ -55,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
             nameCreater1.invalidate();
         });
 
-        // --- Aplica el degradado a la segunda TextView (appName) ---
         nameCreater2.post(() -> {
             int width = nameCreater2.getMeasuredWidth();
             int[] gradientColors = {
@@ -75,19 +99,49 @@ public class MainActivity extends AppCompatActivity {
 
         new Handler().postDelayed(() -> {
             SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
-            // Fuerza a true siempre mientras pruebas
-           // prefs.edit().putBoolean("isFirstTime", true).apply();
-
             boolean isFirstTime = prefs.getBoolean("isFirstTime", true);
 
             if (isFirstTime) {
-                // Abre el Onboarding siempre
                 startActivity(new Intent(MainActivity.this, OnboardingActivity.class));
             } else {
-                // Si ya lo vio, abre el menú
                 startActivity(new Intent(MainActivity.this, MenuActivity.class));
             }
-            finish(); // cerrar splash
+            finish();
         }, SPLASH_TIME);
+    }
+
+    // ============================
+    //  RESULTADO DEL PERMISO
+    // ============================
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQ_NOTIFICATIONS) {
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                Log.d("PERMISOS", " Usuario CONCEDIÓ notificaciones");
+                lanzarNotificacionPrueba();
+
+            } else {
+                Log.e("PERMISOS", " Usuario DENEGÓ notificaciones");
+            }
+        }
+    }
+
+    // ============================
+    // NOTIFICACIÓN DE PRUEBA CORRECTA
+    // ============================
+    private void lanzarNotificacionPrueba() {
+        Log.d("MAIN", " Lanzando notificación de prueba");
+
+        new NotificationHelper(this).showAlarmNotification(
+                999,
+                "PRUEBA URGENTE",
+                "Si vess esto, las notificaciones SI funcionan"
+        );
     }
 }

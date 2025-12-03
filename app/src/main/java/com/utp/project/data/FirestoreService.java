@@ -36,7 +36,7 @@ public class FirestoreService {
 
     public static DocumentReference userDoc() {
         String uid = uid();
-        if (uid == null) throw new IllegalStateException("Usuario no autenticado.");
+        if (uid == null) return null;
         return db().collection(COL_USUARIOS).document(uid);
     }
 

@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.utp.project.data.FirestoreService;
 import com.utp.project.databinding.ActivityHomeBinding;
 
 import java.util.ArrayList;
@@ -180,6 +181,10 @@ public class HomeFragment extends Fragment {
      * Carga las actividades desde Firestore y muestra las próximas actividades pendientes
      */
     private void loadActividadesFromFirestore() {
+        if (FirestoreService.uid() == null) {
+            return;
+        }
+
         actividadesListener = com.utp.project.data.FirestoreService.listenActividades((snap, e) -> {
             if (e != null) {
                 Toast.makeText(getContext(), "Error al cargar actividades: " + e.getMessage(), Toast.LENGTH_SHORT).show();

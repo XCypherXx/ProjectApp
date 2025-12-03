@@ -70,7 +70,7 @@ public class ActivityRegistro extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-        mAuth.signOut(); //prueba
+       // mAuth.signOut(); //prueba
         // Obtener referencias de los elementos del layout
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
         cbAceptarTerminos = findViewById(R.id.cbAceptarTerminos);
