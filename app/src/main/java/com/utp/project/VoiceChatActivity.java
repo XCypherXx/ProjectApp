@@ -1,8 +1,11 @@
 package com.utp.project;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +21,10 @@ import com.utp.project.R;
 import com.utp.project.ai.ActivityData;
 import com.utp.project.ai.VoiceToActivityProcessor;
 import com.utp.project.data.FirestoreActivityRepository;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class VoiceChatActivity extends AppCompatActivity
         implements VoiceToActivityProcessor.Callback {
@@ -70,6 +77,130 @@ public class VoiceChatActivity extends AppCompatActivity
             } else {
                 requestAudioPermission();
             }
+        }
+    }
+
+    private void programarNotificacion(ActivityData activityData) {
+        try {
+            // Obtener fecha y hora de inicio
+            if (activityData.getDateStart() == null || activityData.getTimeStart() == null) {
+                Log.w("VoiceChatActivity", "No hay fecha/hora de inicio, no se programa notificación");
+                return;
+            }
+
+            // Parsear fecha y hora de inicio
+            Calendar startCalendar = parseDateTimeToCalendar(
+                    activityData.getDateStart(),
+                    activityData.getTimeStart()
+            );
+
+            if (startCalendar == null) {
+                Log.e("VoiceChatActivity", "Error al parsear fecha/hora de inicio");
+                return;
+            }
+
+            // Obtener minutos antes de notificar (por defecto 15 minutos)
+            int notificationMinutesBefore = activityData.getNotificarMinAntes() != null
+                    ? activityData.getNotificarMinAntes()
+                    : 15;
+
+            // Obtener username desde SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            String username = prefs.getString("username", "usuario");
+
+            // Calcular hora de notificación
+            Calendar notificationTime = (Calendar) startCalendar.clone();
+            notificationTime.add(Calendar.MINUTE, -notificationMinutesBefore);
+
+            // Forzar a que sea en punto (sin segundos ni milisegundos)
+            notificationTime.set(Calendar.SECOND, 0);
+            notificationTime.set(Calendar.MILLISECOND, 0);
+
+            Log.d("VoiceChatActivity", "Hora de notificación calculada: " + notificationTime.getTime());
+            Log.d("VoiceChatActivity", "Hora actual del sistema: " + new Date(System.currentTimeMillis()));
+
+            if (notificationTime.getTimeInMillis() < System.currentTimeMillis()) {
+                Log.w("VoiceChatActivity", "⚠ La hora de notificación ya pasó. No se programa.");
+                return;
+            }
+
+            int notificationId = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
+            Log.d("VoiceChatActivity", "Notification ID generado: " + notificationId);
+
+            // Formatear hora de inicio para el mensaje
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", new Locale("es", "ES"));
+            String horaInicio = sdf.format(startCalendar.getTime());
+
+            // Crear mensaje para la notificación
+            String mensaje = "Tu actividad \"" + activityData.getTitle() + "\" comienza a las " + horaInicio;
+            if (activityData.getLocation() != null && !activityData.getLocation().isEmpty()) {
+                mensaje += " en " + activityData.getLocation();
+            }
+
+            // Programar alarma
+            NotificationReceiver.programarAlarma(
+                    this,
+                    notificationTime.getTimeInMillis(),
+                    "Recordatorio: " + activityData.getTitle(),
+                    mensaje,
+                    notificationId,
+                    username
+            );
+
+            Log.d("VoiceChatActivity", "Alarma programada correctamente");
+
+        } catch (Exception e) {
+            Log.e("VoiceChatActivity", "Error al programar notificación: " + e.getMessage(), e);
+        }
+    }
+
+    private Calendar parseDateTimeToCalendar(String dateStr, String timeStr) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return null;
+        }
+
+        try {
+            Calendar calendar = Calendar.getInstance();
+
+            // Parsear fecha
+            String[] dateParts = dateStr.split("-");
+            if (dateParts.length >= 3) {
+                int year = Integer.parseInt(dateParts[0]);
+                int month = Integer.parseInt(dateParts[1]) - 1; // Calendar.MONTH es 0-based
+                int day = Integer.parseInt(dateParts[2]);
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month);
+                calendar.set(Calendar.DAY_OF_MONTH, day);
+            } else {
+                return null;
+            }
+
+            // Parsear hora
+            if (timeStr != null && !timeStr.isEmpty()) {
+                String[] timeParts = timeStr.trim().split(":");
+                if (timeParts.length >= 2) {
+                    int hour = Integer.parseInt(timeParts[0]);
+                    int minute = Integer.parseInt(timeParts[1]);
+                    calendar.set(Calendar.HOUR_OF_DAY, hour);
+                    calendar.set(Calendar.MINUTE, minute);
+                } else {
+                    // Si no hay hora válida, usar medianoche
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                }
+            } else {
+                // Si no hay hora, usar medianoche
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+            }
+
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            return calendar;
+        } catch (Exception e) {
+            Log.e("VoiceChatActivity", "Error al parsear fecha/hora: " + e.getMessage(), e);
+            return null;
         }
     }
 
@@ -179,6 +310,8 @@ public class VoiceChatActivity extends AppCompatActivity
         repository.saveUserActivity(uid, activityData, new FirestoreActivityRepository.SaveCallback() {
             @Override
             public void onSuccess(String activityId) {
+                // NUEVO: Programar notificación con voz
+                programarNotificacion(activityData);
                 runOnUiThread(() -> {
                     Toast.makeText(VoiceChatActivity.this,
                             "✅ Actividad guardada exitosamente",
