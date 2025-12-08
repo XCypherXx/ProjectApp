@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.EditText;
 
@@ -88,6 +89,18 @@ public class ActivityRegistro extends AppCompatActivity {
 
         // Botones Sociales
         btnFacebook = findViewById(R.id.btnFacebook);
+
+        // 1. Referencia al TextView
+        TextView tvIniciarSesion = findViewById(R.id.iniciarsesionAqui);
+
+// 2. Obtener el texto del XML
+        String fullText = tvIniciarSesion.getText().toString();
+// IMPORTANTE: Asegúrate de que este texto coincida EXACTAMENTE con la parte que quieres linkear
+// en tu string @string/registro_iniciar_sesion (ej: "Iniciar sesión aquí")
+        String linkText = "Inicia Sesión aquí";
+
+// 3. Crear SpannableString
+        android.text.SpannableString ss = new android.text.SpannableString(fullText);
 
         btnRegistrarse.setOnClickListener(v -> {
             String username = editTextUsuario.getText().toString().trim();
@@ -185,6 +198,38 @@ public class ActivityRegistro extends AppCompatActivity {
                         Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
                     });
         });
+
+        // 4. Buscar dónde empieza y termina la frase clave
+        int start = fullText.indexOf(linkText);
+
+// Validación de seguridad por si el texto no coincide
+        if (start != -1) {
+            int end = start + linkText.length();
+
+            // 5. Aplicar el ClickableSpan
+            ss.setSpan(new android.text.style.ClickableSpan() {
+                @Override
+                public void onClick(@androidx.annotation.NonNull android.view.View widget) {
+                    // Navegar al Login (y cerrar registro para no apilar actividades)
+                    Intent intent = new Intent(ActivityRegistro.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    finish();
+                }
+
+                @Override
+                public void updateDrawState(@androidx.annotation.NonNull android.text.TextPaint ds) {
+                    super.updateDrawState(ds);
+                    ds.setUnderlineText(true); // Subrayado
+                    // ds.setColor(Color.BLUE); // Opcional: cambiar color
+                }
+            }, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+// 6. Activar el link
+        tvIniciarSesion.setText(ss);
+        tvIniciarSesion.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+        tvIniciarSesion.setHighlightColor(android.graphics.Color.TRANSPARENT);
 
         // Deshabilitar el botón de registro por defecto
         btnRegistrarse.setEnabled(false);

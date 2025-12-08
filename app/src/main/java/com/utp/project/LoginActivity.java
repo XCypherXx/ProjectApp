@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -85,6 +86,16 @@ public class LoginActivity extends AppCompatActivity {
         btnGoogle = findViewById(R.id.btnGoogle);
         btnFacebook = findViewById(R.id.btnFacebook);
 
+        // 1. Referencia al TextView
+        TextView tvRegistrar = findViewById(R.id.registrarAqui);
+
+// 2. Obtener el texto que ya pusiste en el XML
+        String fullText = tvRegistrar.getText().toString();
+        String linkText = "Registrate aquí"; // La parte exacta a la que daremos click
+
+// 3. Crear SpannableString
+        android.text.SpannableString ss = new android.text.SpannableString(fullText);
+
         // Listener del botón Ingresar (Login FireBase)
         // Listener del botón Ingresar (Login con email/password)
         // Listener del botón Ingresar (Login con username -> busca email -> valida contraseña)
@@ -119,6 +130,34 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // 4. Buscar dónde empieza y termina la frase
+        int start = fullText.indexOf(linkText);
+        int end = start + linkText.length();
+
+// 5. Aplicar el ClickableSpan (Click + Subrayado)
+        if (start != -1) {
+            ss.setSpan(new android.text.style.ClickableSpan() {
+                @Override
+                public void onClick(@androidx.annotation.NonNull android.view.View widget) {
+                    // Navegar al registro
+                    Intent intent = new Intent(LoginActivity.this, ActivityRegistro.class);
+                    startActivity(intent);
+                }
+
+                @Override
+                public void updateDrawState(@androidx.annotation.NonNull android.text.TextPaint ds) {
+                    super.updateDrawState(ds);
+                    ds.setUnderlineText(true); // Fuerza la línea debajo
+                    // ds.setColor(Color.BLUE); // Descomenta si quieres cambiar el color del link
+                }
+            }, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+// 6. Activar el link en el TextView
+        tvRegistrar.setText(ss);
+        tvRegistrar.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+        tvRegistrar.setHighlightColor(android.graphics.Color.TRANSPARENT); // Quita el fondo gris al pulsar
 
         // [GOOGLE] Listener para botón de Google
         btnGoogle.setOnClickListener(view -> signInWithGoogle());
