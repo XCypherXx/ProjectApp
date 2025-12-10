@@ -114,6 +114,7 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
             Log.d("FAB_DEBUG", "FAB click recibido en HomeActivity");
             Toast.makeText(this, "escuchando", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(HomeActivity.this, VoiceChatActivity.class);
+            intent.putExtra("AUTO_START_MIC", true); // Esto activa el micrófono y el espectro automáticamente
             startActivity(intent);
 
         });

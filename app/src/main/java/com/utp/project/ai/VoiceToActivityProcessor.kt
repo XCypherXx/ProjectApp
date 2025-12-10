@@ -29,6 +29,9 @@ class VoiceToActivityProcessor @JvmOverloads constructor(
         fun onTextRecognized(rawText: String)
         fun onActivityParsed(activityData: ActivityData)
         fun onError(message: String)
+        fun onListeningStateChanged(isListening: Boolean) // Ya lo tenías o agregalo si falta
+        // NUEVO: Método para el volumen
+        fun onAudioLevelUpdated(rmsdB: Float)
     }
 
     private var speechRecognizer: SpeechRecognizer? = null
@@ -75,7 +78,10 @@ class VoiceToActivityProcessor @JvmOverloads constructor(
 
     override fun onBeginningOfSpeech() {}
 
-    override fun onRmsChanged(rmsdB: Float) {}
+    override fun onRmsChanged(rmsdB: Float) {
+        // Enviar el nivel de decibelios a la actividad
+        callback.onAudioLevelUpdated(rmsdB)
+    }
 
     override fun onBufferReceived(buffer: ByteArray?) {}
 

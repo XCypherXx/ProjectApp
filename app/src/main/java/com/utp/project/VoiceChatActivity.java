@@ -40,6 +40,7 @@ public class VoiceChatActivity extends AppCompatActivity
     private TextView tvListening;
     private View btnBack;
     private boolean shouldAutoStartMic = false; // Flag para activación automática
+    private AudioWaveView audioWaveView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +57,9 @@ public class VoiceChatActivity extends AppCompatActivity
 
         // Inicialmente ocultar el texto "Escuchando..."
         tvListening.setVisibility(View.GONE);
+
+        // Inicializar el visualizador
+        audioWaveView = findViewById(R.id.audio_wave_view);
 
         voiceProcessor = new VoiceToActivityProcessor(this, this);
         repository = new FirestoreActivityRepository();
@@ -348,5 +352,29 @@ public class VoiceChatActivity extends AppCompatActivity
             return FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
         return null;
+    }
+
+    // --- Método obligatorio faltante ---
+    @Override
+    public void onListeningStateChanged(boolean isListening) {
+        // Aquí puedes cambiar la UI si está escuchando o no
+        runOnUiThread(() -> {
+            if (isListening) {
+                // Ejemplo: Cambiar ícono a "Stop" o mostrar animación
+                tvListening.setVisibility(View.VISIBLE);
+            } else {
+                // Ejemplo: Ocultar animación
+                tvListening.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    @Override
+    public void onAudioLevelUpdated(float rmsdB) {
+        runOnUiThread(() -> {
+            if (audioWaveView != null) {
+                audioWaveView.updateAmplitude(rmsdB);
+            }
+        });
     }
 }
